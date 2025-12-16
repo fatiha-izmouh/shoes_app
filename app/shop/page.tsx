@@ -1,9 +1,9 @@
-"use client"
-
 import { ProductCard } from "@/components/product-card"
-import { products } from "@/lib/products"
+import { getProducts } from "@/lib/products-service"
 
-export default function ShopPage() {
+export default async function ShopPage() {
+  const products = await getProducts()
+
   return (
     <div className="min-h-screen py-12">
       <div className="container mx-auto px-4">
@@ -16,9 +16,15 @@ export default function ShopPage() {
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {products.length > 0 ? (
+            products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))
+          ) : (
+            <div className="col-span-full text-center py-12">
+              <p className="text-muted-foreground">No products available at the moment.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

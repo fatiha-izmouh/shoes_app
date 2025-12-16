@@ -10,6 +10,7 @@ export interface Product {
   rating: number
   reviewCount: number
   reviews?: Review[]
+  stock?: Record<string, number> // Stock by size: { "8": 5, "8.5": 3, ... }
 }
 
 export interface Color {

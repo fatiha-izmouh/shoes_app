@@ -22,22 +22,70 @@ export default function CheckoutPage() {
     return null
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsProcessing(true)
 
-    // Simulate payment processing
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+    const formData = new FormData(e.currentTarget)
+    const firstName = formData.get("firstName") as string
+    const lastName = formData.get("lastName") as string
+    const email = formData.get("email") as string
+    const address = formData.get("address") as string
+    const city = formData.get("city") as string
+    const zip = formData.get("zip") as string
+    const fullAddress = `${address}, ${city}, ${zip}`
 
-    clearCart()
-    setIsProcessing(false)
+    try {
+      // Prepare order data
+      const orderData = {
+        nom_client: `${firstName} ${lastName}`,
+        email: email,
+        adresse: fullAddress,
+        items: cart.map((item) => ({
+          id_produit: parseInt(item.product.id),
+          quantite: item.quantity,
+          prix_unitaire: item.product.price,
+          taille: item.selectedSize,
+          couleur: item.selectedColor.name,
+        })),
+        payment: {
+          montant: getCartTotal() * 1.1, // Total with tax
+          methode: "card",
+          statut: "completed",
+        },
+      }
 
-    toast({
-      title: "Order placed successfully!",
-      description: "Thank you for your purchase. You will receive a confirmation email shortly.",
-    })
+      // Save order to database
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderData),
+      })
 
-    router.push("/")
+      if (!response.ok) {
+        throw new Error("Failed to create order")
+      }
+
+      clearCart()
+      setIsProcessing(false)
+
+      toast({
+        title: "Order placed successfully!",
+        description: "Thank you for your purchase. You will receive a confirmation email shortly.",
+      })
+
+      router.push("/")
+    } catch (error) {
+      console.error("Error placing order:", error)
+      setIsProcessing(false)
+      toast({
+        title: "Error",
+        description: "Failed to place order. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   return (

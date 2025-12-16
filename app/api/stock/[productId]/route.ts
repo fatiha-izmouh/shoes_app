@@ -1,0 +1,37 @@
+import { NextResponse } from "next/server"
+import pool from "@/lib/db"
+
+// Get all stock entries for a product (all sizes)
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ productId: string }> }
+) {
+  try {
+    const { productId } = await params
+    const productIdNum = parseInt(productId)
+
+    if (isNaN(productIdNum)) {
+      return NextResponse.json({ error: "Invalid product ID" }, { status: 400 })
+    }
+
+    const result = await pool.query(
+      "SELECT taille, quantite FROM stock WHERE id_produit = $1 ORDER BY taille",
+      [productIdNum]
+    )
+
+    // Convert to object for easier lookup: { "8": 5, "8.5": 3, ... }
+    const stockBySize: Record<string, number> = {}
+    result.rows.forEach((row) => {
+      stockBySize[row.taille.toString()] = row.quantite
+    })
+
+    return NextResponse.json({ 
+      productId: productIdNum,
+      stock: stockBySize
+    })
+  } catch (error) {
+    console.error("Error fetching stock:", error)
+    return NextResponse.json({ error: "Failed to fetch stock" }, { status: 500 })
+  }
+}
+

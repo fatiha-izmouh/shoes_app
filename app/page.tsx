@@ -2,10 +2,11 @@ import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ProductCard } from "@/components/product-card"
-import { products } from "@/lib/products"
+import { getProducts } from "@/lib/products-service"
 import { ArrowRight } from "lucide-react"
 
-export default function Home() {
+export default async function Home() {
+  const products = await getProducts()
   const featuredProducts = products.slice(0, 3)
 
   return (
