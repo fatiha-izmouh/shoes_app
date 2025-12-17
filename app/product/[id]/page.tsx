@@ -5,13 +5,14 @@ import { use } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { notFound, useRouter } from "next/navigation"
-import { Star, Check, ShoppingBag, ChevronLeft } from "lucide-react"
+import { Star, Check, ShoppingBag, ChevronLeft, Ruler } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { useCart } from "@/contexts/cart-context"
 import { useToast } from "@/hooks/use-toast"
 import { getProduct } from "@/lib/products-service"
 import type { Product, Color } from "@/lib/types"
+import { FootMeasurementGuide } from "@/components/foot-measurement-guide"
 
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -25,6 +26,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [selectedColor, setSelectedColor] = useState<Color | null>(null)
   const [selectedSize, setSelectedSize] = useState<number | null>(null)
   const [quantity, setQuantity] = useState(1)
+  const [isCustomizeMode, setIsCustomizeMode] = useState(false)
 
   const { addToCart } = useCart()
   const { toast } = useToast()
@@ -288,35 +290,78 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
             {/* Size Selection */}
             <div className="mb-8">
-              <label className="text-sm font-medium mb-3 block">Size (US)</label>
-              {hasAvailableSizes ? (
-                <div className="grid grid-cols-6 gap-2">
-                  {sizesToDisplay.map((size) => {
-                    const sizeStock = getStockForSize(size)
-                    const available = isSizeAvailable(size)
-                    return (
-                      <Button
-                        key={size}
-                        variant={selectedSize === size ? "default" : "outline"}
-                        onClick={() => {
-                          setSelectedSize(size)
-                        }}
-                        disabled={!available}
-                        className={`h-12 ${!available ? "opacity-50 cursor-not-allowed" : ""}`}
-                        title={available ? `${sizeStock} available` : "Out of stock"}
-                      >
-                        {size}
-                        {available && sizeStock < 5 && (
-                          <span className="ml-1 text-xs">({sizeStock})</span>
-                        )}
-                      </Button>
-                    )
-                  })}
+              <div className="flex items-center justify-between mb-3">
+                <label className="text-sm font-medium block">Size (US)</label>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant={!isCustomizeMode ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setIsCustomizeMode(false)}
+                    className="text-xs"
+                  >
+                    Standard
+                  </Button>
+                  <FootMeasurementGuide
+                    onSizeSelect={(size) => {
+                      setSelectedSize(size)
+                      setIsCustomizeMode(true)
+                      toast({
+                        title: "Custom size calculated",
+                        description: `Recommended size: ${size} (US)`,
+                      })
+                    }}
+                  />
                 </div>
+              </div>
+              
+              {!isCustomizeMode ? (
+                hasAvailableSizes ? (
+                  <div className="grid grid-cols-6 gap-2">
+                    {sizesToDisplay.map((size) => {
+                      const sizeStock = getStockForSize(size)
+                      const available = isSizeAvailable(size)
+                      return (
+                        <Button
+                          key={size}
+                          variant={selectedSize === size ? "default" : "outline"}
+                          onClick={() => {
+                            setSelectedSize(size)
+                          }}
+                          disabled={!available}
+                          className={`h-12 ${!available ? "opacity-50 cursor-not-allowed" : ""}`}
+                          title={available ? `${sizeStock} available` : "Out of stock"}
+                        >
+                          {size}
+                          {available && sizeStock < 5 && (
+                            <span className="ml-1 text-xs">({sizeStock})</span>
+                          )}
+                        </Button>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-destructive mt-2">
+                    Currently out of stock for all sizes.
+                  </p>
+                )
               ) : (
-                <p className="text-sm text-destructive mt-2">
-                  Currently out of stock for all sizes.
-                </p>
+                <div className="border-2 border-dashed border-primary/50 rounded-lg p-4 bg-primary/5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">Custom Size Selected</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Size: {selectedSize ? `${selectedSize} (US)` : "Not selected"}
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsCustomizeMode(false)}
+                    >
+                      Change
+                    </Button>
+                  </div>
+                </div>
               )}
             </div>
 

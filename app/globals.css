@@ -5,6 +5,7 @@
 
 /* Updated color scheme for luxury premium aesthetic with warm stone tones */
 :root {
+  --logo-bg: #f5f0ea;
   --background: oklch(0.99 0.005 85);
   --foreground: oklch(0.18 0.015 65);
   --card: oklch(1 0 0);
