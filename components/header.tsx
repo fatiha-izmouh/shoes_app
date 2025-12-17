@@ -21,7 +21,7 @@ export function Header() {
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
           <img
-            src="/images/whatsapp-20image-202025-12-16-20at-2013.jpeg"
+            src="/images/logo.jpeg"
             alt="ValkyLeather"
             className="h-14 w-14 object-contain"
           />

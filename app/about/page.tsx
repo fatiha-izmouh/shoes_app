@@ -15,20 +15,14 @@ export default function AboutPage() {
 
         <div className="space-y-8 mb-16">
           <p className="text-muted-foreground leading-relaxed">
-            Founded in Florence, Italy, LUXE began with a simple philosophy: exceptional footwear should be accessible
-            to those who appreciate true craftsmanship. What started as a small workshop has grown into a globally
-            recognized brand, yet we have never compromised on our founding principles.
+          ValkyLeather is a small family workshop dedicated to handmade leather craftsmanship.      
+          Each pair of shoes is carefully made by hand using natural leather, including cow, goat, and sheep leather, selected for comfort, durability, and flexibility. 
           </p>
           <p className="text-muted-foreground leading-relaxed">
-            Every pair of LUXE shoes is meticulously handcrafted by our team of master artisans, using only the finest
-            materials sourced from the most prestigious tanneries in Europe. Our commitment to traditional techniques,
-            combined with modern innovation, results in footwear that is as comfortable as it is beautiful.
-          </p>
+          We do not mass-produce. Every order is made individually, based on the customer’s foot measurements, to ensure a proper fit and everyday comfort. Our designs are inspired by traditional leatherworking, adapted for modern use such as LARP, festivals, and outdoor wear. </p>         
           <p className="text-muted-foreground leading-relaxed">
-            Our atelier in the heart of Florence remains the beating heart of our brand. Here, time-honored methods meet
-            contemporary design, where each stitch tells a story of dedication and passion. We believe that true luxury
-            lies not in excess, but in the perfection of every detail.
-          </p>
+          From cutting and stitching to finishing, every step is done by hand in our workshop, with close attention to detail and honest materials.
+          We offer worldwide shipping and direct communication with our customers, because handmade work should always remain personal.          </p>
         </div>
 
         <h2 className="text-3xl font-serif font-light mb-8">Our Values</h2>
