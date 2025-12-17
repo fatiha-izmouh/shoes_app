@@ -38,7 +38,7 @@ export default function CartPage() {
                   <div className="flex gap-6">
                     <div className="relative w-32 h-32 flex-shrink-0 bg-muted overflow-hidden">
                       <Image
-                        src={item.selectedColor.image || "/placeholder.svg"}
+                        src={item.product.images?.[0] || item.selectedColor.image || "/placeholder.svg"}
                         alt={item.product.name}
                         fill
                         className="object-cover"

@@ -20,9 +20,12 @@ export async function GET(
     )
 
     // Convert to object for easier lookup: { "8": 5, "8.5": 3, ... }
+    // Normalize keys so "38.0" becomes "38" and matches UI lookups.
     const stockBySize: Record<string, number> = {}
     result.rows.forEach((row) => {
-      stockBySize[row.taille.toString()] = row.quantite
+      const sizeNumber = parseFloat(row.taille as unknown as string)
+      const sizeKey = Number.isNaN(sizeNumber) ? String(row.taille) : sizeNumber.toString()
+      stockBySize[sizeKey] = row.quantite
     })
 
     return NextResponse.json({ 

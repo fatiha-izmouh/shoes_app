@@ -52,18 +52,12 @@ export async function GET() {
       }
       
       // Ensure we always have exactly 3 images (pad with placeholder if needed)
+      // Only pad if columns are actually empty - don't replace existing values
       while (productImages.length < 3) {
         productImages.push("/placeholder.svg")
       }
       
-      // Remove duplicates - if all images are the same, only keep one unique image
-      const uniqueImages = [...new Set(productImages)]
-      if (uniqueImages.length === 1 && productImages.length === 3) {
-        // If all 3 are the same, keep only the first one and use placeholders for the rest
-        productImages = [productImages[0], "/placeholder.svg", "/placeholder.svg"]
-      }
-      
-      // Take only first 3 images
+      // Take only first 3 images (image, image2, image3)
       productImages = productImages.slice(0, 3)
 
       return {

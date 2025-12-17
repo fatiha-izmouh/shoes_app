@@ -87,10 +87,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       return
     }
 
-    // Check stock availability
     const sizeKey = selectedSize.toString()
     const availableStock = stock[sizeKey] || 0
-    
+
     if (availableStock === 0) {
       toast({
         title: "Out of stock",
@@ -116,15 +115,25 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     })
   }
 
-  // Get available stock for a size
+  // Get available stock for a size (from stock table)
   const getStockForSize = (size: number): number => {
     return stock[size.toString()] || 0
   }
 
-  // Check if size is available
+  // Check if size is available (quantity > 0)
   const isSizeAvailable = (size: number): boolean => {
     return getStockForSize(size) > 0
   }
+
+  // Derive sizes from stock table (preferred), fallback to product.sizes for display
+  const stockSizes = Object.entries(stock)
+    .filter(([, qty]) => qty > 0)
+    .map(([size]) => parseFloat(size))
+    .sort((a, b) => a - b)
+
+  const hasAnyStockRows = Object.keys(stock).length > 0
+  const hasAvailableSizes = stockSizes.length > 0
+  const sizesToDisplay = stockSizes
 
   return (
     <div className="min-h-screen py-12">
@@ -183,35 +192,46 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               <div className="grid grid-cols-2 gap-3">
                 {product.images.slice(1, 3).map((image, index) => {
                   const thumbnailIndex = index + 1 // index 1 and 2 (image2 and image3)
-                  // Skip if image is placeholder or empty
-                  if (!image || image === "/placeholder.svg" || image.trim() === "") {
-                    return null
-                  }
+                  const isPlaceholder = !image || image === "/placeholder.svg" || image.trim() === ""
+                  
                   return (
                     <button
                       key={thumbnailIndex}
                       type="button"
                       onClick={() => {
-                        // When clicking thumbnail, show it in main image
-                        console.log("Thumbnail clicked, switching to image index:", thumbnailIndex)
-                        setSelectedImage(thumbnailIndex)
+                        if (!isPlaceholder) {
+                          // When clicking thumbnail, show it in main image
+                          console.log("Thumbnail clicked, switching to image index:", thumbnailIndex)
+                          setSelectedImage(thumbnailIndex)
+                        }
                       }}
-                      className={`relative h-24 overflow-hidden bg-muted border-2 rounded-lg transition-all hover:border-primary cursor-pointer ${
-                        selectedImage === thumbnailIndex ? "border-primary scale-105" : "border-transparent"
+                      disabled={isPlaceholder}
+                      className={`relative h-24 overflow-hidden bg-muted border-2 rounded-lg transition-all ${
+                        isPlaceholder 
+                          ? "border-dashed border-muted-foreground/30 cursor-not-allowed opacity-50" 
+                          : "hover:border-primary cursor-pointer"
+                      } ${
+                        selectedImage === thumbnailIndex && !isPlaceholder ? "border-primary scale-105" : "border-transparent"
                       }`}
                     >
-                      <Image
-                        src={image}
-                        alt={`${product.name} view ${index + 2}`}
-                        fill
-                        sizes="(max-width: 768px) 25vw, 12vw"
-                        className="object-cover"
-                        onLoad={() => console.log("✅ Thumbnail loaded:", image)}
-                        onError={(e) => {
-                          console.error("❌ Thumbnail failed to load:", image)
-                          console.error("Full path attempted:", e.currentTarget.src)
-                        }}
-                      />
+                      {isPlaceholder ? (
+                        <div className="flex items-center justify-center h-full text-muted-foreground text-xs">
+                          No image {index + 2}
+                        </div>
+                      ) : (
+                        <Image
+                          src={image}
+                          alt={`${product.name} view ${index + 2}`}
+                          fill
+                          sizes="(max-width: 768px) 25vw, 12vw"
+                          className="object-cover"
+                          onLoad={() => console.log("✅ Thumbnail loaded:", image)}
+                          onError={(e) => {
+                            console.error("❌ Thumbnail failed to load:", image)
+                            console.error("Full path attempted:", e.currentTarget.src)
+                          }}
+                        />
+                      )}
                     </button>
                   )
                 })}
@@ -269,29 +289,34 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             {/* Size Selection */}
             <div className="mb-8">
               <label className="text-sm font-medium mb-3 block">Size (US)</label>
-              <div className="grid grid-cols-6 gap-2">
-                {product.sizes.map((size) => {
-                  const sizeStock = getStockForSize(size)
-                  const available = isSizeAvailable(size)
-                  return (
-                    <Button
-                      key={size}
-                      variant={selectedSize === size ? "default" : "outline"}
-                      onClick={() => setSelectedSize(size)}
-                      disabled={!available}
-                      className={`h-12 ${!available ? "opacity-50 cursor-not-allowed" : ""}`}
-                      title={available ? `${sizeStock} available` : "Out of stock"}
-                    >
-                      {size}
-                      {available && sizeStock < 5 && (
-                        <span className="ml-1 text-xs">({sizeStock})</span>
-                      )}
-                    </Button>
-                  )
-                })}
-              </div>
-              {selectedSize && !isSizeAvailable(selectedSize) && (
-                <p className="text-sm text-destructive mt-2">This size is out of stock</p>
+              {hasAvailableSizes ? (
+                <div className="grid grid-cols-6 gap-2">
+                  {sizesToDisplay.map((size) => {
+                    const sizeStock = getStockForSize(size)
+                    const available = isSizeAvailable(size)
+                    return (
+                      <Button
+                        key={size}
+                        variant={selectedSize === size ? "default" : "outline"}
+                        onClick={() => {
+                          setSelectedSize(size)
+                        }}
+                        disabled={!available}
+                        className={`h-12 ${!available ? "opacity-50 cursor-not-allowed" : ""}`}
+                        title={available ? `${sizeStock} available` : "Out of stock"}
+                      >
+                        {size}
+                        {available && sizeStock < 5 && (
+                          <span className="ml-1 text-xs">({sizeStock})</span>
+                        )}
+                      </Button>
+                    )
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-destructive mt-2">
+                  Currently out of stock for all sizes.
+                </p>
               )}
             </div>
 
@@ -329,7 +354,12 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
             {/* Actions */}
             <div className="flex gap-4 mb-8">
-              <Button size="lg" className="flex-1" onClick={handleAddToCart}>
+              <Button
+                size="lg"
+                className="flex-1"
+                onClick={handleAddToCart}
+                disabled={!hasAvailableSizes}
+              >
                 <ShoppingBag className="mr-2 h-5 w-5" />
                 Add to Cart
               </Button>
