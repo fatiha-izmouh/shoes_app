@@ -159,23 +159,29 @@ export default function ContactPage() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Name *</Label>
-                  <Input id="name" placeholder="Your full name" required />
+                  <Input id="name" name="name" placeholder="Your full name" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email *</Label>
-                  <Input id="email" type="email" placeholder="you@example.com" required />
+                  <Input id="email" name="email" type="email" placeholder="you@example.com" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone</Label>
-                  <Input id="phone" type="tel" placeholder="+1 (555) 000-0000" />
+                  <Input id="phone" name="phone" type="tel" placeholder="+1 (555) 000-0000" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="subject">Subject *</Label>
-                  <Input id="subject" placeholder="How can we help?" required />
+                  <Input id="subject" name="subject" placeholder="How can we help?" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="message">Message *</Label>
-                  <Textarea id="message" rows={6} placeholder="Tell us more about your inquiry..." required />
+                  <Textarea
+                    id="message"
+                    name="message"
+                    rows={6}
+                    placeholder="Tell us more about your inquiry..."
+                    required
+                  />
                 </div>
                 <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
                   {isSubmitting ? "Sending..." : "Send Message"}
