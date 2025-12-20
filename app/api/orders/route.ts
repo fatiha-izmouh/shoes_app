@@ -29,27 +29,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    const client = await pool.connect()
+    const connection = await pool.getConnection()
 
     try {
-      await client.query("BEGIN")
+      await connection.beginTransaction()
 
       // Insert order
-      const orderResult = await client.query(
+      const [orderResult] = await connection.query(
         `INSERT INTO commande (nom_client, email, telephone, adresse, statut)
-         VALUES ($1, $2, $3, $4, $5)
-         RETURNING id_commande`,
+         VALUES (?, ?, ?, ?, ?)`,
         [body.nom_client, body.email, body.telephone || null, body.adresse || null, "pending"]
-      )
+      ) as any
 
-      const orderId = orderResult.rows[0].id_commande
+      const orderId = orderResult.insertId
 
       // Insert order lines and update stock
       for (const item of body.items) {
         // Insert order line with size and color
-        await client.query(
+        await connection.query(
           `INSERT INTO ligne_commande (id_commande, id_produit, quantite, prix_unitaire, taille, couleur)
-           VALUES ($1, $2, $3, $4, $5, $6)`,
+           VALUES (?, ?, ?, ?, ?, ?)`,
           [
             orderId,
             item.id_produit,
@@ -62,23 +61,23 @@ export async function POST(request: Request) {
 
         // Update stock if size is provided
         if (item.taille !== undefined) {
-          await client.query(
+          await connection.query(
             `UPDATE stock 
-             SET quantite = quantite - $1
-             WHERE id_produit = $2 AND taille = $3 AND quantite >= $1`,
-            [item.quantite, item.id_produit, parseFloat(item.taille.toString())]
+             SET quantite = quantite - ?
+             WHERE id_produit = ? AND taille = ? AND quantite >= ?`,
+            [item.quantite, item.id_produit, parseFloat(item.taille.toString()), item.quantite]
           )
         }
       }
 
       // Insert payment
-      await client.query(
+      await connection.query(
         `INSERT INTO paiement (id_commande, montant, methode, statut, date_paiement)
-         VALUES ($1, $2, $3, $4, CURRENT_DATE)`,
+         VALUES (?, ?, ?, ?, CURDATE())`,
         [orderId, body.payment.montant, body.payment.methode, body.payment.statut]
       )
 
-      await client.query("COMMIT")
+      await connection.commit()
 
       return NextResponse.json({ 
         success: true, 
@@ -86,10 +85,10 @@ export async function POST(request: Request) {
         message: "Order created successfully" 
       })
     } catch (error) {
-      await client.query("ROLLBACK")
+      await connection.rollback()
       throw error
     } finally {
-      client.release()
+      connection.release()
     }
   } catch (error) {
     console.error("Error creating order:", error)

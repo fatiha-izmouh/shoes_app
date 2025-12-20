@@ -16,9 +16,9 @@ const defaultProductData = {
 
 export async function GET() {
   try {
-    const result = await pool.query("SELECT * FROM produit ORDER BY id_produit")
+    const [rows] = await pool.query("SELECT * FROM produit ORDER BY id_produit")
     
-    const products: Product[] = result.rows.map((row) => {
+    const products: Product[] = (rows as any[]).map((row) => {
       // Try to parse additional data from description if it's JSON
       let additionalData = defaultProductData
       try {

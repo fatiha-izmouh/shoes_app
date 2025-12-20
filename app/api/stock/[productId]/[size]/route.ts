@@ -15,12 +15,12 @@ export async function GET(
       return NextResponse.json({ error: "Invalid product ID or size" }, { status: 400 })
     }
 
-    const result = await pool.query(
-      "SELECT quantite FROM stock WHERE id_produit = $1 AND taille = $2",
+    const [rows] = await pool.query(
+      "SELECT quantite FROM stock WHERE id_produit = ? AND taille = ?",
       [productIdNum, sizeNum]
     )
 
-    const stock = result.rows.length > 0 ? result.rows[0].quantite : 0
+    const stock = Array.isArray(rows) && rows.length > 0 ? (rows[0] as any).quantite : 0
 
     return NextResponse.json({ 
       productId: productIdNum,

@@ -21,13 +21,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Invalid product ID" }, { status: 400 })
     }
 
-    const result = await pool.query("SELECT * FROM produit WHERE id_produit = $1", [productId])
+    const [rows] = await pool.query("SELECT * FROM produit WHERE id_produit = ?", [productId])
 
-    if (result.rows.length === 0) {
+    if (!Array.isArray(rows) || rows.length === 0) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 })
     }
 
-    const row = result.rows[0]
+    const row = rows[0] as any
 
     // Try to parse additional data from description if it's JSON
     let additionalData = defaultProductData

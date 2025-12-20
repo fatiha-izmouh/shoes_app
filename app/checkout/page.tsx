@@ -93,6 +93,9 @@ export default function CheckoutPage() {
               throw new Error("Please fill in all shipping fields before paying.")
             }
 
+            // Calculate total with tax (same calculation as in createOrder)
+            const totalWithTax: number = getCartTotal() * 1.1
+
             // Prepare order data to save in your database
             const orderData = {
               nom_client: `${firstName} ${lastName}`,
@@ -106,7 +109,7 @@ export default function CheckoutPage() {
                 couleur: item.selectedColor.name,
               })),
               payment: {
-                montant: parseFloat(totalWithTax),
+                montant: parseFloat(totalWithTax.toFixed(2)),
                 methode: "paypal",
                 statut: "completed",
               },

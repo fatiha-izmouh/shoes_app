@@ -16,16 +16,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    const result = await pool.query(
+    const [result] = await pool.query(
       `INSERT INTO contact_message (nom, email, message)
-       VALUES ($1, $2, $3)
-       RETURNING id_message`,
+       VALUES (?, ?, ?)`,
       [body.nom, body.email, body.message]
-    )
+    ) as any
 
     return NextResponse.json({ 
       success: true, 
-      messageId: result.rows[0].id_message,
+      messageId: result.insertId,
       message: "Contact message saved successfully" 
     })
   } catch (error) {
