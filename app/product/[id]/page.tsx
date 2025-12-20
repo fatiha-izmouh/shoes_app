@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { useCart } from "@/contexts/cart-context"
 import { useToast } from "@/hooks/use-toast"
 import { getProduct } from "@/lib/products-service"
-import type { Product, Color } from "@/lib/types"
+import type { Product, Color, CustomMeasurements } from "@/lib/types"
 import { FootMeasurementGuide } from "@/components/foot-measurement-guide"
 
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
@@ -27,6 +27,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [selectedSize, setSelectedSize] = useState<number | null>(null)
   const [quantity, setQuantity] = useState(1)
   const [isCustomizeMode, setIsCustomizeMode] = useState(false)
+  const [customMeasurements, setCustomMeasurements] = useState<CustomMeasurements | undefined>(undefined)
 
   const { addToCart } = useCart()
   const { toast } = useToast()
@@ -110,10 +111,18 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       return
     }
 
-    addToCart(product, selectedColor, selectedSize, quantity)
+    addToCart(
+      product,
+      selectedColor,
+      selectedSize,
+      quantity,
+      customMeasurements,
+      isCustomizeMode
+    )
+
     toast({
       title: "Added to cart",
-      description: `${product.name} has been added to your cart`,
+      description: `${product.name} has been added to your cart${isCustomizeMode ? ' with custom measurements' : ''}`,
     })
   }
 
@@ -151,8 +160,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         <div className="grid md:grid-cols-2 gap-12">
           {/* Images */}
           <div className="space-y-4">
-            {/* Main Image - Shows selected image (defaults to product.images[0]) */}
-            <div className="relative aspect-square overflow-hidden bg-muted rounded-lg border border-border">
+            {/* Main Image with Arrow Navigation */}
+            <div className="relative aspect-square overflow-hidden bg-muted rounded-lg border border-border group">
               {product.images && product.images.length > 0 ? (
                 <>
                   {/* Debug: Show image path (only in dev, positioned to not cover image) */}
@@ -178,6 +187,31 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                       console.error("Selected image index:", selectedImage)
                     }}
                   />
+
+                  {/* Navigation Arrows - Only show if more than 1 image */}
+                  {product.images.length > 1 && (
+                    <>
+                      {/* Left Arrow */}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedImage((prev) => (prev === 0 ? product.images.length - 1 : prev - 1))}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all opacity-0 group-hover:opacity-100"
+                        aria-label="Previous image"
+                      >
+                        <ChevronLeft className="h-6 w-6" />
+                      </button>
+
+                      {/* Right Arrow */}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedImage((prev) => (prev === product.images.length - 1 ? 0 : prev + 1))}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all opacity-0 group-hover:opacity-100"
+                        aria-label="Next image"
+                      >
+                        <ChevronLeft className="h-6 w-6 rotate-180" />
+                      </button>
+                    </>
+                  )}
                 </>
               ) : (
                 <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -188,52 +222,22 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 </div>
               )}
             </div>
-            {/* Thumbnails - Show all three images */}
-            {/* Clicking a thumbnail changes the main image */}
-            {product.images && product.images.length > 0 && (
-              <div className="grid grid-cols-3 gap-4">
-                {product.images.slice(0, 3).map((image, index) => {
-                  const isPlaceholder = !image || image === "/placeholder.svg" || image.trim() === ""
 
-                  return (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => {
-                        if (!isPlaceholder) {
-                          // When clicking thumbnail, show it in main image
-                          console.log("Thumbnail clicked, switching to image index:", index)
-                          setSelectedImage(index)
-                        }
-                      }}
-                      disabled={isPlaceholder}
-                      className={`relative h-32 overflow-hidden bg-muted border-2 rounded-lg transition-all ${isPlaceholder
-                          ? "border-dashed border-muted-foreground/30 cursor-not-allowed opacity-50"
-                          : "hover:border-primary cursor-pointer"
-                        } ${selectedImage === index && !isPlaceholder ? "border-primary scale-105" : "border-transparent"
-                        }`}
-                    >
-                      {isPlaceholder ? (
-                        <div className="flex items-center justify-center h-full text-muted-foreground text-xs">
-                          No image {index + 1}
-                        </div>
-                      ) : (
-                        <Image
-                          src={image}
-                          alt={`${product.name} view ${index + 1}`}
-                          fill
-                          sizes="(max-width: 768px) 33vw, 16vw"
-                          className="object-cover"
-                          onLoad={() => console.log("✅ Thumbnail loaded:", image)}
-                          onError={(e) => {
-                            console.error("❌ Thumbnail failed to load:", image)
-                            console.error("Full path attempted:", e.currentTarget.src)
-                          }}
-                        />
-                      )}
-                    </button>
-                  )
-                })}
+            {/* Dot Indicators - Only show if more than 1 image */}
+            {product.images && product.images.length > 1 && (
+              <div className="flex justify-center gap-2">
+                {product.images.map((_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setSelectedImage(index)}
+                    className={`h-2 rounded-full transition-all ${selectedImage === index
+                      ? "w-8 bg-primary"
+                      : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                      }`}
+                    aria-label={`Go to image ${index + 1}`}
+                  />
+                ))}
               </div>
             )}
           </div>

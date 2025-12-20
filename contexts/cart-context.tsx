@@ -3,11 +3,18 @@
 import type React from "react"
 
 import { createContext, useContext, useState, useEffect } from "react"
-import type { CartItem, Product, Color } from "@/lib/types"
+import type { CartItem, Product, Color, CustomMeasurements } from "@/lib/types"
 
 interface CartContextType {
   cart: CartItem[]
-  addToCart: (product: Product, color: Color, size: number, quantity: number) => void
+  addToCart: (
+    product: Product,
+    color: Color,
+    size: number,
+    quantity: number,
+    customMeasurements?: CustomMeasurements,
+    isCustomSize?: boolean
+  ) => void
   removeFromCart: (productId: string, colorName: string, size: number) => void
   updateQuantity: (productId: string, colorName: string, size: number, quantity: number) => void
   clearCart: () => void
@@ -42,22 +49,42 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [cart, mounted])
 
-  const addToCart = (product: Product, color: Color, size: number, quantity: number) => {
+  const addToCart = (
+    product: Product,
+    color: Color,
+    size: number,
+    quantity: number,
+    customMeasurements?: CustomMeasurements,
+    isCustomSize?: boolean
+  ) => {
     setCart((prevCart) => {
       const existingItem = prevCart.find(
         (item) =>
-          item.product.id === product.id && item.selectedColor.name === color.name && item.selectedSize === size,
+          item.product.id === product.id &&
+          item.selectedColor.name === color.name &&
+          item.selectedSize === size &&
+          item.isCustomSize === isCustomSize
       )
 
       if (existingItem) {
         return prevCart.map((item) =>
-          item.product.id === product.id && item.selectedColor.name === color.name && item.selectedSize === size
+          item.product.id === product.id &&
+            item.selectedColor.name === color.name &&
+            item.selectedSize === size &&
+            item.isCustomSize === isCustomSize
             ? { ...item, quantity: item.quantity + quantity }
             : item,
         )
       }
 
-      return [...prevCart, { product, selectedColor: color, selectedSize: size, quantity }]
+      return [...prevCart, {
+        product,
+        selectedColor: color,
+        selectedSize: size,
+        quantity,
+        customMeasurements,
+        isCustomSize
+      }]
     })
   }
 

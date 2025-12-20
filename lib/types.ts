@@ -27,9 +27,20 @@ export interface Review {
   comment: string
 }
 
+export interface CustomMeasurements {
+  footLength: number
+  footWidth: number
+  archHeight: number
+  heelToBall: number
+  instepCircumference: number
+  calculatedSize: number
+}
+
 export interface CartItem {
   product: Product
   selectedColor: Color
   selectedSize: number
   quantity: number
+  customMeasurements?: CustomMeasurements  // Optional custom measurements
+  isCustomSize?: boolean                    // Flag to indicate custom sizing
 }
