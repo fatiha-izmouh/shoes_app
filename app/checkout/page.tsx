@@ -107,6 +107,8 @@ export default function CheckoutPage() {
                 prix_unitaire: item.product.price,
                 taille: item.selectedSize,
                 couleur: item.selectedColor.name,
+                customMeasurements: item.customMeasurements,
+                isCustomSize: item.isCustomSize
               })),
               payment: {
                 montant: parseFloat(totalWithTax.toFixed(2)),

@@ -80,7 +80,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     return null
   }
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (redirect: boolean = false) => {
     if (!selectedSize) {
       toast({
         title: "Please select a size",
@@ -120,10 +120,14 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       isCustomizeMode
     )
 
-    toast({
-      title: "Added to cart",
-      description: `${product.name} has been added to your cart${isCustomizeMode ? ' with custom measurements' : ''}`,
-    })
+    if (redirect) {
+      router.push("/checkout")
+    } else {
+      toast({
+        title: "Added to cart",
+        description: `${product.name} has been added to your cart${isCustomizeMode ? ' with custom measurements' : ''}`,
+      })
+    }
   }
 
   // Get available stock for a size (from stock table)
@@ -309,6 +313,18 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                         description: `Recommended size: ${size} (US)`,
                       })
                     }}
+                    onMeasurementsSubmit={(measurements) => {
+                      // Map the string measurements to numbers for our CustomMeasurements interface
+                      setCustomMeasurements({
+                        footLength: parseFloat(measurements.length) || 0,
+                        footWidth: parseFloat(measurements.width) || 0,
+                        archHeight: 0, // Not currently captured by UI but needed for interface
+                        heelToBall: 0,
+                        instepCircumference: parseFloat(measurements.instepCircumference) || 0,
+                        calculatedSize: parseFloat(measurements.length) * 1.5 + 1.5 // Rough calc, overridden by onSizeSelect
+                      })
+                      console.log("Captured custom measurements:", measurements)
+                    }}
                   />
                 </div>
               </div>
@@ -400,12 +416,21 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             <div className="flex gap-4 mb-8">
               <Button
                 size="lg"
+                variant="outline"
                 className="flex-1"
-                onClick={handleAddToCart}
+                onClick={() => handleAddToCart(false)}
                 disabled={!hasAvailableSizes}
               >
                 <ShoppingBag className="mr-2 h-5 w-5" />
                 Add to Cart
+              </Button>
+              <Button
+                size="lg"
+                className="flex-1"
+                onClick={() => handleAddToCart(true)}
+                disabled={!hasAvailableSizes}
+              >
+                Buy Now
               </Button>
             </div>
 

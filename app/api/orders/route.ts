@@ -12,6 +12,14 @@ interface OrderRequest {
     prix_unitaire: number
     taille?: number | string
     couleur?: string
+    customMeasurements?: {
+      footLength: number
+      footWidth: number
+      archHeight: number
+      heelToBall: number
+      instepCircumference: number
+      calculatedSize: number
+    }
   }>
   payment: {
     montant: number
@@ -58,6 +66,34 @@ export async function POST(request: Request) {
             item.couleur || null,
           ]
         )
+        const lineId = (await connection.query('SELECT LAST_INSERT_ID() as id') as any)[0][0].id
+
+        // Insert custom measurements if present
+        if (item.customMeasurements) {
+          const [measureResult] = await connection.query(
+            `INSERT INTO custom_measurements 
+             (id_produit, foot_length, foot_width, arch_height, heel_to_ball, instep_circumference, calculated_size, is_custom)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+              item.id_produit,
+              item.customMeasurements.footLength,
+              item.customMeasurements.footWidth,
+              item.customMeasurements.archHeight || 0,
+              item.customMeasurements.heelToBall || 0,
+              item.customMeasurements.instepCircumference,
+              item.customMeasurements.calculatedSize,
+              true
+            ]
+          ) as any
+
+          const measureId = measureResult.insertId
+
+          // Link measurement to order line
+          await connection.query(
+            `UPDATE ligne_commande SET id_measurement = ? WHERE id_ligne = ?`,
+            [measureId, lineId]
+          )
+        }
 
         // Update stock if size is provided
         if (item.taille !== undefined) {
@@ -79,10 +115,10 @@ export async function POST(request: Request) {
 
       await connection.commit()
 
-      return NextResponse.json({ 
-        success: true, 
+      return NextResponse.json({
+        success: true,
         orderId,
-        message: "Order created successfully" 
+        message: "Order created successfully"
       })
     } catch (error) {
       await connection.rollback()
