@@ -20,7 +20,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
   const [stock, setStock] = useState<Record<string, number>>({})
-  
+
   // All hooks must be called before any conditional returns
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedColor, setSelectedColor] = useState<Color | null>(null)
@@ -38,18 +38,18 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         notFound()
         return
       }
-      
+
       // Debug: Log the product images
       console.log("Fetched product images:", fetchedProduct.images)
       console.log("Product ID:", id)
       console.log("Full product data:", fetchedProduct)
-      
+
       setProduct(fetchedProduct)
       setSelectedColor(fetchedProduct.colors[0])
-      
+
       // Reset selectedImage to 0 when product changes
       setSelectedImage(0)
-      
+
       // Fetch stock information
       try {
         const stockResponse = await fetch(`/api/stock/${id}`)
@@ -60,7 +60,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       } catch (error) {
         console.error("Error fetching stock:", error)
       }
-      
+
       setLoading(false)
     }
     fetchProduct()
@@ -188,44 +188,41 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 </div>
               )}
             </div>
-            {/* Thumbnails - Only show image2 and image3 (indices 1 and 2) */}
+            {/* Thumbnails - Show all three images */}
             {/* Clicking a thumbnail changes the main image */}
-            {product.images && product.images.length > 1 && (
-              <div className="grid grid-cols-2 gap-3">
-                {product.images.slice(1, 3).map((image, index) => {
-                  const thumbnailIndex = index + 1 // index 1 and 2 (image2 and image3)
+            {product.images && product.images.length > 0 && (
+              <div className="grid grid-cols-3 gap-4">
+                {product.images.slice(0, 3).map((image, index) => {
                   const isPlaceholder = !image || image === "/placeholder.svg" || image.trim() === ""
-                  
+
                   return (
                     <button
-                      key={thumbnailIndex}
+                      key={index}
                       type="button"
                       onClick={() => {
                         if (!isPlaceholder) {
                           // When clicking thumbnail, show it in main image
-                          console.log("Thumbnail clicked, switching to image index:", thumbnailIndex)
-                          setSelectedImage(thumbnailIndex)
+                          console.log("Thumbnail clicked, switching to image index:", index)
+                          setSelectedImage(index)
                         }
                       }}
                       disabled={isPlaceholder}
-                      className={`relative h-24 overflow-hidden bg-muted border-2 rounded-lg transition-all ${
-                        isPlaceholder 
-                          ? "border-dashed border-muted-foreground/30 cursor-not-allowed opacity-50" 
+                      className={`relative h-32 overflow-hidden bg-muted border-2 rounded-lg transition-all ${isPlaceholder
+                          ? "border-dashed border-muted-foreground/30 cursor-not-allowed opacity-50"
                           : "hover:border-primary cursor-pointer"
-                      } ${
-                        selectedImage === thumbnailIndex && !isPlaceholder ? "border-primary scale-105" : "border-transparent"
-                      }`}
+                        } ${selectedImage === index && !isPlaceholder ? "border-primary scale-105" : "border-transparent"
+                        }`}
                     >
                       {isPlaceholder ? (
                         <div className="flex items-center justify-center h-full text-muted-foreground text-xs">
-                          No image {index + 2}
+                          No image {index + 1}
                         </div>
                       ) : (
                         <Image
                           src={image}
-                          alt={`${product.name} view ${index + 2}`}
+                          alt={`${product.name} view ${index + 1}`}
                           fill
-                          sizes="(max-width: 768px) 25vw, 12vw"
+                          sizes="(max-width: 768px) 33vw, 16vw"
                           className="object-cover"
                           onLoad={() => console.log("✅ Thumbnail loaded:", image)}
                           onError={(e) => {
@@ -251,9 +248,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`h-5 w-5 ${
-                        i < Math.floor(product.rating) ? "fill-current text-yellow-500" : "text-muted"
-                      }`}
+                      className={`h-5 w-5 ${i < Math.floor(product.rating) ? "fill-current text-yellow-500" : "text-muted"
+                        }`}
                     />
                   ))}
                 </div>
@@ -274,9 +270,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   <button
                     key={color.name}
                     onClick={() => setSelectedColor(color)}
-                    className={`relative w-12 h-12 rounded-full border-2 transition-all ${
-                      selectedColor.name === color.name ? "border-primary scale-110" : "border-muted"
-                    }`}
+                    className={`relative w-12 h-12 rounded-full border-2 transition-all ${selectedColor.name === color.name ? "border-primary scale-110" : "border-muted"
+                      }`}
                     style={{ backgroundColor: color.hex }}
                     title={color.name}
                   >
@@ -313,7 +308,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   />
                 </div>
               </div>
-              
+
               {!isCustomizeMode ? (
                 hasAvailableSizes ? (
                   <div className="grid grid-cols-6 gap-2">
@@ -369,18 +364,18 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             <div className="mb-8">
               <label className="text-sm font-medium mb-3 block">Quantity</label>
               <div className="flex items-center gap-3">
-                <Button 
-                  variant="outline" 
-                  size="icon" 
+                <Button
+                  variant="outline"
+                  size="icon"
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   disabled={quantity <= 1}
                 >
                   -
                 </Button>
                 <span className="w-12 text-center font-medium">{quantity}</span>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
+                <Button
+                  variant="outline"
+                  size="icon"
                   onClick={() => {
                     const maxQty = selectedSize ? getStockForSize(selectedSize) : 999
                     setQuantity(Math.min(quantity + 1, maxQty))
@@ -430,45 +425,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           </div>
         </div>
 
-        {/* Reviews */}
-        {product.reviews && product.reviews.length > 0 && (
-          <div className="mt-20">
-            <h2 className="text-3xl font-serif font-light mb-8">Customer Reviews</h2>
-            <div className="grid gap-6">
-              {product.reviews.map((review) => (
-                <Card key={review.id}>
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h3 className="font-medium mb-1">{review.author}</h3>
-                        <div className="flex items-center gap-2">
-                          <div className="flex">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`h-4 w-4 ${
-                                  i < review.rating ? "fill-current text-yellow-500" : "text-muted"
-                                }`}
-                              />
-                            ))}
-                          </div>
-                          <span className="text-sm text-muted-foreground">
-                            {new Date(review.date).toLocaleDateString("en-US", {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-muted-foreground leading-relaxed">{review.comment}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
+
       </div>
     </div>
   )

@@ -15,14 +15,14 @@ export default function AboutPage() {
 
         <div className="space-y-8 mb-16">
           <p className="text-muted-foreground leading-relaxed">
-          ValkyLeather is a small family workshop dedicated to handmade leather craftsmanship.      
-          Each pair of shoes is carefully made by hand using natural leather, including cow, goat, and sheep leather, selected for comfort, durability, and flexibility. 
+            ValkyLeather is a small family workshop dedicated to handmade leather craftsmanship.
+            Each pair of shoes is carefully made by hand using natural leather, including cow, goat, and sheep leather, selected for comfort, durability, and flexibility.
           </p>
           <p className="text-muted-foreground leading-relaxed">
-          We do not mass-produce. Every order is made individually, based on the customer’s foot measurements, to ensure a proper fit and everyday comfort. Our designs are inspired by traditional leatherworking, adapted for modern use such as LARP, festivals, and outdoor wear. </p>         
+            We do not mass-produce. Every order is made individually, based on the customer’s foot measurements, to ensure a proper fit and everyday comfort. Our designs are inspired by traditional leatherworking, adapted for modern use such as LARP, festivals, and outdoor wear. </p>
           <p className="text-muted-foreground leading-relaxed">
-          From cutting and stitching to finishing, every step is done by hand in our workshop, with close attention to detail and honest materials.
-          We offer worldwide shipping and direct communication with our customers, because handmade work should always remain personal.          </p>
+            From cutting and stitching to finishing, every step is done by hand in our workshop, with close attention to detail and honest materials.
+            We offer worldwide shipping and direct communication with our customers, because handmade work should always remain personal.          </p>
         </div>
 
         <h2 className="text-3xl font-serif font-light mb-8">Our Values</h2>
@@ -60,7 +60,7 @@ export default function AboutPage() {
         </div>
 
         <div className="bg-muted/30 rounded-lg p-8 mb-16">
-          <h2 className="text-3xl font-serif font-light mb-8 text-center">The LUXE Process</h2>
+          <h2 className="text-3xl font-serif font-light mb-8 text-center">The ValkyLeather Process</h2>
           <div className="grid md:grid-cols-4 gap-6">
             <div className="text-center">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">

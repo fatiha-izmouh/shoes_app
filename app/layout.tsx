@@ -16,7 +16,7 @@ const cormorant = Cormorant_Garamond({
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "LUXE - Premium Designer Footwear",
+  title: "VALKYLEATHER - Premium Designer Footwear",
   description:
     "Discover exceptional footwear where Italian craftsmanship meets timeless elegance. Handcrafted luxury shoes since 1985.",
   generator: "v0.app",
