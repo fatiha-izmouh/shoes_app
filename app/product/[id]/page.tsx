@@ -93,22 +93,25 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     const sizeKey = selectedSize.toString()
     const availableStock = stock[sizeKey] || 0
 
-    if (availableStock === 0) {
-      toast({
-        title: "Out of stock",
-        description: `Size ${selectedSize} is currently out of stock`,
-        variant: "destructive",
-      })
-      return
-    }
+    // Only check stock for standard orders
+    if (!isCustomizeMode) {
+      if (availableStock === 0) {
+        toast({
+          title: "Out of stock",
+          description: `Size ${selectedSize} is currently out of stock`,
+          variant: "destructive",
+        })
+        return
+      }
 
-    if (quantity > availableStock) {
-      toast({
-        title: "Insufficient stock",
-        description: `Only ${availableStock} available in size ${selectedSize}`,
-        variant: "destructive",
-      })
-      return
+      if (quantity > availableStock) {
+        toast({
+          title: "Insufficient stock",
+          description: `Only ${availableStock} available in size ${selectedSize}`,
+          variant: "destructive",
+        })
+        return
+      }
     }
 
     addToCart(
@@ -397,10 +400,10 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   variant="outline"
                   size="icon"
                   onClick={() => {
-                    const maxQty = selectedSize ? getStockForSize(selectedSize) : 999
+                    const maxQty = (selectedSize && !isCustomizeMode) ? getStockForSize(selectedSize) : 999
                     setQuantity(Math.min(quantity + 1, maxQty))
                   }}
-                  disabled={selectedSize ? quantity >= getStockForSize(selectedSize) : false}
+                  disabled={(selectedSize && !isCustomizeMode) ? quantity >= getStockForSize(selectedSize) : false}
                 >
                   +
                 </Button>
@@ -419,7 +422,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 variant="outline"
                 className="flex-1"
                 onClick={() => handleAddToCart(false)}
-                disabled={!hasAvailableSizes}
+                disabled={!isCustomizeMode && !hasAvailableSizes}
               >
                 <ShoppingBag className="mr-2 h-5 w-5" />
                 Add to Cart
@@ -428,7 +431,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 size="lg"
                 className="flex-1"
                 onClick={() => handleAddToCart(true)}
-                disabled={!hasAvailableSizes}
+                disabled={!isCustomizeMode && !hasAvailableSizes}
               >
                 Buy Now
               </Button>
