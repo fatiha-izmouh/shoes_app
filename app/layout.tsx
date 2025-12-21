@@ -2,9 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Cormorant_Garamond, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
-import { CartProvider } from "@/contexts/cart-context"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
+
 import { Toaster } from "@/components/ui/toaster"
 import "./globals.css"
 
@@ -49,12 +47,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased ${cormorant.variable}`}>
-        <CartProvider>
-          <Header />
-          <main>{children}</main>
-          <Footer />
-          <Toaster />
-        </CartProvider>
+        {children}
+        <Toaster />
         <Analytics />
       </body>
     </html>
