@@ -105,7 +105,10 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
                     {/* Status Update */}
                     <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
                         <h2 className="font-semibold text-white mb-4">Update Status</h2>
-                        <form action={updateOrderStatus} className="flex gap-2">
+                        <form action={async (formData) => {
+                            'use server'
+                            await updateOrderStatus(formData)
+                        }} className="flex gap-2">
                             <input type="hidden" name="order_id" value={order.id_commande} />
                             <div className="relative flex-1">
                                 <select
