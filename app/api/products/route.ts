@@ -17,63 +17,61 @@ const defaultProductData = {
 export async function GET() {
   try {
     const [rows] = await pool.query("SELECT * FROM produit ORDER BY id_produit")
-    
+    const [stockRows] = await pool.query("SELECT * FROM stock") as any
+
+    // Group stock by product_id
+    const stockMap: Record<number, any[]> = {}
+    stockRows.forEach((s: any) => {
+      if (!stockMap[s.id_produit]) stockMap[s.id_produit] = []
+      stockMap[s.id_produit].push(s)
+    })
+
     const products: Product[] = (rows as any[]).map((row) => {
-      // Try to parse additional data from description if it's JSON
       let additionalData = defaultProductData
       try {
         const parsed = JSON.parse(row.description || "{}")
         if (parsed.images || parsed.colors) {
           additionalData = { ...defaultProductData, ...parsed }
         }
-      } catch {
-        // If description is not JSON, use default data
-      }
+      } catch { }
 
-      // Priority: Use images from database columns (image, image2, image3)
-      // Database stores paths like: /images/products/nike-air.png
-      // Next.js serves files from public/ folder automatically
       let productImages: string[] = []
-      
-      // Collect all images from database columns (image, image2, image3)
-      if (row.image) {
-        productImages.push(row.image)
-      }
-      if (row.image2) {
-        productImages.push(row.image2)
-      }
-      if (row.image3) {
-        productImages.push(row.image3)
-      }
-      
-      // Fallback to JSON description images if database columns are empty
+      if (row.image) productImages.push(row.image)
+      if (row.image2) productImages.push(row.image2)
+      if (row.image3) productImages.push(row.image3)
+
       if (productImages.length === 0 && additionalData.images && additionalData.images.length > 0) {
         productImages = additionalData.images
       }
-      
-      // Ensure we always have exactly 3 images (pad with placeholder if needed)
-      // Only pad if columns are actually empty - don't replace existing values
+
       while (productImages.length < 3) {
         productImages.push("/placeholder.svg")
       }
-      
-      // Take only first 3 images (image, image2, image3)
       productImages = productImages.slice(0, 3)
+
+      // Get stock for this product
+      const productStock = stockMap[row.id_produit] || []
+      const availableSizes = productStock.map(s => Number(s.taille)).sort((a, b) => a - b)
+      const stockRecord: Record<string, number> = {}
+      productStock.forEach(s => {
+        stockRecord[s.taille.toString()] = s.quantite
+      })
 
       return {
         id: row.id_produit.toString(),
         name: row.nom,
-        description: typeof row.description === "string" && !row.description.startsWith("{") 
-          ? row.description 
+        description: typeof row.description === "string" && !row.description.startsWith("{")
+          ? row.description
           : "Handcrafted leather footwear with exceptional quality.",
         price: parseFloat(row.prix.toString()),
         category: additionalData.category,
         images: productImages,
         colors: additionalData.colors,
-        sizes: additionalData.sizes,
+        sizes: availableSizes.length > 0 ? availableSizes : additionalData.sizes,
         rating: additionalData.rating,
         reviewCount: additionalData.reviewCount,
         reviews: additionalData.reviews,
+        stock: stockRecord
       }
     })
 
