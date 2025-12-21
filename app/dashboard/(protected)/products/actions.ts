@@ -29,20 +29,20 @@ export async function createProduct(prevState: any, formData: FormData) {
     const image2File = formData.get('image2') as File
     const image3File = formData.get('image3') as File
 
-    const image = await uploadImage(imageFile)
-    const image2 = await uploadImage(image2File)
-    const image3 = await uploadImage(image3File)
-
     try {
+        const image = await uploadImage(imageFile)
+        const image2 = await uploadImage(image2File)
+        const image3 = await uploadImage(image3File)
+
         await pool.query(
             'INSERT INTO produit (nom, description, prix, image, image2, image3) VALUES (?, ?, ?, ?, ?, ?)',
             [name, description, price, image, image2, image3]
         )
         revalidatePath('/dashboard/products')
         return { success: true }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error creating product:', error)
-        return { error: 'Failed to create product' }
+        return { error: `Failed to create product: ${error.message || 'Unknown error'}` }
     }
 }
 
@@ -51,21 +51,24 @@ export async function updateProduct(id: number, prevState: any, formData: FormDa
     const description = formData.get('description')
     const price = formData.get('price')
 
-    // Get existing product to keep images if not updated
-    // Ideally we pass existing images as hidden fields or fetch them here.
-    // Fetching is safer.
-    const [existing] = await pool.query('SELECT image, image2, image3 FROM produit WHERE id_produit = ?', [id]) as any
-    const current = existing[0]
-
-    const imageFile = formData.get('image') as File
-    const image2File = formData.get('image2') as File
-    const image3File = formData.get('image3') as File
-
-    const image = (imageFile && imageFile.size > 0) ? await uploadImage(imageFile) : current.image
-    const image2 = (image2File && image2File.size > 0) ? await uploadImage(image2File) : current.image2
-    const image3 = (image3File && image3File.size > 0) ? await uploadImage(image3File) : current.image3
-
     try {
+        // Get existing product to keep images if not updated
+        // Ideally we pass existing images as hidden fields or fetch them here.
+        // Fetching is safer.
+        const [existing] = await pool.query('SELECT image, image2, image3 FROM produit WHERE id_produit = ?', [id]) as any
+        if (!existing || existing.length === 0) {
+            return { error: 'Product not found' }
+        }
+        const current = existing[0]
+
+        const imageFile = formData.get('image') as File
+        const image2File = formData.get('image2') as File
+        const image3File = formData.get('image3') as File
+
+        const image = (imageFile && imageFile.size > 0) ? await uploadImage(imageFile) : current.image
+        const image2 = (image2File && image2File.size > 0) ? await uploadImage(image2File) : current.image2
+        const image3 = (image3File && image3File.size > 0) ? await uploadImage(image3File) : current.image3
+
         await pool.query(
             'UPDATE produit SET nom = ?, description = ?, prix = ?, image = ?, image2 = ?, image3 = ? WHERE id_produit = ?',
             [name, description, price, image, image2, image3, id]
@@ -73,9 +76,9 @@ export async function updateProduct(id: number, prevState: any, formData: FormDa
         revalidatePath('/dashboard/products')
         revalidatePath(`/dashboard/products/${id}`)
         return { success: true }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error updating product:', error)
-        return { error: 'Failed to update product' }
+        return { error: `Failed to update product: ${error.message || 'Unknown error'}` }
     }
 }
 
