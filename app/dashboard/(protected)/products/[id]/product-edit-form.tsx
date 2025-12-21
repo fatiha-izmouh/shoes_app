@@ -62,26 +62,55 @@ export default function ProductEditForm({ product }: { product: any }) {
                 />
             </div>
 
-            <div className="space-y-2">
-                <Label className="text-gray-200">Images (URLs)</Label>
-                <Input
-                    name="image"
-                    defaultValue={product.image || ''}
-                    placeholder="Main Image URL"
-                    className="bg-gray-800 border-gray-700 text-white mb-2"
-                />
-                <Input
-                    name="image2"
-                    defaultValue={product.image2 || ''}
-                    placeholder="Second Image URL"
-                    className="bg-gray-800 border-gray-700 text-white mb-2"
-                />
-                <Input
-                    name="image3"
-                    defaultValue={product.image3 || ''}
-                    placeholder="Third Image URL"
-                    className="bg-gray-800 border-gray-700 text-white"
-                />
+            <div className="space-y-4">
+                <Label className="text-gray-200">Product Images</Label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="image" className="text-xs text-gray-400">Main Image</Label>
+                        {product.image && (
+                            <div className="relative aspect-square w-20 rounded-md overflow-hidden bg-gray-800 border border-gray-700 mb-2">
+                                <img src={product.image} alt="Main" className="object-cover w-full h-full" />
+                            </div>
+                        )}
+                        <Input
+                            id="image"
+                            name="image"
+                            type="file"
+                            accept="image/*"
+                            className="bg-gray-800 border-gray-700 text-white cursor-pointer file:cursor-pointer file:text-white file:bg-gray-700 file:border-0 file:rounded-md file:px-2 file:mr-2 hover:file:bg-gray-600 transition-colors"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="image2" className="text-xs text-gray-400">Image 2</Label>
+                        {product.image2 && (
+                            <div className="relative aspect-square w-20 rounded-md overflow-hidden bg-gray-800 border border-gray-700 mb-2">
+                                <img src={product.image2} alt="Second" className="object-cover w-full h-full" />
+                            </div>
+                        )}
+                        <Input
+                            id="image2"
+                            name="image2"
+                            type="file"
+                            accept="image/*"
+                            className="bg-gray-800 border-gray-700 text-white cursor-pointer file:cursor-pointer file:text-white file:bg-gray-700 file:border-0 file:rounded-md file:px-2 file:mr-2 hover:file:bg-gray-600 transition-colors"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="image3" className="text-xs text-gray-400">Image 3</Label>
+                        {product.image3 && (
+                            <div className="relative aspect-square w-20 rounded-md overflow-hidden bg-gray-800 border border-gray-700 mb-2">
+                                <img src={product.image3} alt="Third" className="object-cover w-full h-full" />
+                            </div>
+                        )}
+                        <Input
+                            id="image3"
+                            name="image3"
+                            type="file"
+                            accept="image/*"
+                            className="bg-gray-800 border-gray-700 text-white cursor-pointer file:cursor-pointer file:text-white file:bg-gray-700 file:border-0 file:rounded-md file:px-2 file:mr-2 hover:file:bg-gray-600 transition-colors"
+                        />
+                    </div>
+                </div>
             </div>
 
             {state?.error && (

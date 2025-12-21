@@ -1,19 +1,36 @@
+import Search from "@/components/dashboard/search"
 import pool from "@/lib/db"
 import Link from "next/link"
 import { Eye } from "lucide-react"
 
-async function getOrders() {
-    const [rows] = await pool.query('SELECT * FROM commande ORDER BY date_commande DESC') as any
+async function getOrders(query?: string) {
+    let sql = 'SELECT * FROM commande'
+    const params = []
+
+    if (query) {
+        sql += ' WHERE nom_client LIKE ? OR email LIKE ? OR id_commande LIKE ?'
+        params.push(`%${query}%`, `%${query}%`, `%${query}%`)
+    }
+
+    sql += ' ORDER BY date_commande DESC'
+
+    const [rows] = await pool.query(sql, params) as any
     return rows
 }
 
-export default async function OrdersPage() {
-    const orders = await getOrders()
+export default async function OrdersPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ search?: string }>
+}) {
+    const { search } = await searchParams
+    const orders = await getOrders(search)
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold text-white">Orders</h1>
+            <div className="flex items-center justify-between gap-4">
+                <h1 className="text-3xl font-bold text-white whitespace-nowrap">Orders</h1>
+                <Search placeholder="Search orders by name, email or ID..." />
             </div>
 
             <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">

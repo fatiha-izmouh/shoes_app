@@ -1,52 +1,111 @@
 'use client'
 
-import { updateStock } from '../actions'
+import { updateStock, addStock, deleteStock } from '../actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { useState } from 'react'
-import { Check, Save } from 'lucide-react'
-
-// Standard sizes 37-47
-const SIZES = Array.from({ length: 11 }, (_, i) => 37 + i)
+import { useState, useActionState } from 'react'
+import { Check, Save, Trash2, Plus } from 'lucide-react'
 
 export default function StockManager({ productId, initialStock }: { productId: number, initialStock: any[] }) {
-
-    const getQuantity = (size: number) => {
-        const stockItem = initialStock.find((s: any) => Number(s.taille) === size)
-        return stockItem ? stockItem.quantite : 0
-    }
+    // Sort stock by size
+    const sortedStock = [...initialStock].sort((a, b) => Number(a.taille) - Number(b.taille))
 
     return (
-        <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-4 mb-2 text-sm text-gray-400 font-medium">
-                <div>Size</div>
-                <div>Quantity</div>
-                <div className="text-right">Action</div>
+        <div className="space-y-6">
+            <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
+                <h3 className="text-white font-medium mb-4 flex items-center gap-2">
+                    <Plus size={16} />
+                    Add Stock Variant
+                </h3>
+                <AddStockForm productId={productId} />
             </div>
 
-            {SIZES.map((size) => (
-                <StockRow
-                    key={size}
-                    productId={productId}
-                    size={size}
-                    initialQuantity={getQuantity(size)}
-                />
-            ))}
+            <div className="space-y-2">
+                <div className="grid grid-cols-4 gap-4 px-2 text-sm text-gray-400 font-medium">
+                    <div>Size</div>
+                    <div className="col-span-2">Quantity</div>
+                    <div className="text-right">Actions</div>
+                </div>
+
+                {sortedStock.map((stock) => (
+                    <StockRow
+                        key={stock.taille}
+                        productId={productId}
+                        stock={stock}
+                    />
+                ))}
+
+                {sortedStock.length === 0 && (
+                    <div className="text-center py-4 text-gray-500 text-sm">
+                        No stock added yet.
+                    </div>
+                )}
+            </div>
         </div>
     )
 }
 
-function StockRow({ productId, size, initialQuantity }: { productId: number, size: number, initialQuantity: number }) {
-    const [isPending, setIsPending] = useState(false)
+function AddStockForm({ productId }: { productId: number }) {
+    const [state, formAction, isPending] = useActionState(addStock, null)
+
+    return (
+        <form action={formAction} className="grid grid-cols-4 gap-4 items-end">
+            <input type="hidden" name="product_id" value={productId} />
+
+            <div className="space-y-1">
+                <label className="text-xs text-gray-500">Size (EU)</label>
+                <Input
+                    name="size"
+                    type="number"
+                    step="0.5"
+                    required
+                    placeholder="42"
+                    className="h-9 bg-gray-800 border-gray-700 text-white"
+                />
+            </div>
+
+            <div className="col-span-2 space-y-1">
+                <label className="text-xs text-gray-500">Quantity</label>
+                <Input
+                    name="quantity"
+                    type="number"
+                    min="0"
+                    required
+                    placeholder="10"
+                    className="h-9 bg-gray-800 border-gray-700 text-white"
+                />
+            </div>
+
+            <Button
+                type="submit"
+                size="sm"
+                disabled={isPending}
+                className="bg-amber-600 hover:bg-amber-700 text-white h-9 w-full"
+            >
+                {isPending ? 'Adding...' : 'Add'}
+            </Button>
+
+            {state?.error && (
+                <p className="col-span-4 text-xs text-red-500 mt-2">{state.error}</p>
+            )}
+        </form>
+    )
+}
+
+function StockRow({ productId, stock }: { productId: number, stock: any }) {
+    const [isUpdatePending, setIsUpdatePending] = useState(false)
     const [showSuccess, setShowSuccess] = useState(false)
 
-    async function handleSubmit(formData: FormData) {
-        setIsPending(true)
+    async function handleUpdate(formData: FormData) {
+        setIsUpdatePending(true)
         setShowSuccess(false)
+
+        // Ensure size is passed for identification
+        formData.append('size', stock.taille)
 
         const result = await updateStock(formData)
 
-        setIsPending(false)
+        setIsUpdatePending(false)
         if (result?.success) {
             setShowSuccess(true)
             setTimeout(() => setShowSuccess(false), 2000)
@@ -54,32 +113,44 @@ function StockRow({ productId, size, initialQuantity }: { productId: number, siz
     }
 
     return (
-        <form action={handleSubmit} className="grid grid-cols-3 gap-4 items-center">
-            <input type="hidden" name="product_id" value={productId} />
-            <input type="hidden" name="size" value={size} />
+        <div className="grid grid-cols-4 gap-4 items-center bg-gray-800/30 p-2 rounded-lg">
+            <div className="text-white font-medium ml-2">EU {stock.taille}</div>
 
-            <div className="text-white font-medium">EU {size}</div>
-
-            <div>
+            <form action={handleUpdate} className="col-span-2 flex gap-2">
+                <input type="hidden" name="product_id" value={productId} />
                 <Input
                     type="number"
                     name="quantity"
-                    defaultValue={initialQuantity}
+                    defaultValue={stock.quantite}
                     min="0"
-                    className="h-9 bg-gray-800 border-gray-700 text-white text-center"
+                    className="h-9 bg-gray-800 border-gray-700 text-white text-center w-20"
                 />
-            </div>
-
-            <div className="flex justify-end">
                 <Button
                     type="submit"
                     size="sm"
-                    disabled={isPending}
-                    className={`h-9 w-9 p-0 transition-colors ${showSuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-800 hover:bg-gray-700'}`}
+                    disabled={isUpdatePending}
+                    className={`h-9 w-9 p-0 transition-colors ${showSuccess ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-700 hover:bg-gray-600'}`}
                 >
                     {showSuccess ? <Check size={16} /> : <Save size={16} className="text-gray-300" />}
                 </Button>
+            </form>
+
+            <div className="flex justify-end">
+                <form action={async (formData) => {
+                    await deleteStock(formData)
+                }}>
+                    <input type="hidden" name="product_id" value={productId} />
+                    <input type="hidden" name="size" value={stock.taille} />
+                    <Button
+                        type="submit"
+                        size="sm"
+                        variant="ghost"
+                        className="h-9 w-9 p-0 text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                    >
+                        <Trash2 size={16} />
+                    </Button>
+                </form>
             </div>
-        </form>
+        </div>
     )
 }

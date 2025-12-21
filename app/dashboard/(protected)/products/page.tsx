@@ -1,23 +1,40 @@
+import Search from "@/components/dashboard/search"
 import pool from "@/lib/db"
 import Link from "next/link"
 import { Plus, Pencil, Trash2 } from "lucide-react"
 import { deleteProduct } from "./actions"
 
-async function getProducts() {
-    const [rows] = await pool.query('SELECT * FROM produit ORDER BY id_produit DESC') as any
+async function getProducts(query?: string) {
+    let sql = 'SELECT * FROM produit'
+    const params = []
+
+    if (query) {
+        sql += ' WHERE nom LIKE ? OR description LIKE ?'
+        params.push(`%${query}%`, `%${query}%`)
+    }
+
+    sql += ' ORDER BY id_produit DESC'
+
+    const [rows] = await pool.query(sql, params) as any
     return rows
 }
 
-export default async function ProductsPage() {
-    const products = await getProducts()
+export default async function ProductsPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ search?: string }>
+}) {
+    const { search } = await searchParams
+    const products = await getProducts(search)
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold text-white">Products</h1>
+            <div className="flex items-center justify-between gap-4">
+                <h1 className="text-3xl font-bold text-white whitespace-nowrap">Products</h1>
+                <Search placeholder="Search products..." />
                 <Link
                     href="/dashboard/products/new"
-                    className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                    className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-medium py-2 px-4 rounded-lg transition-colors whitespace-nowrap"
                 >
                     <Plus size={20} />
                     Add Product

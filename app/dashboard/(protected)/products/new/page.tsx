@@ -63,23 +63,40 @@ export default function NewProductPage() {
                         />
                     </div>
 
-                    <div className="space-y-2">
-                        <Label className="text-gray-200">Images (URLs)</Label>
-                        <Input
-                            name="image"
-                            placeholder="Main Image URL"
-                            className="bg-gray-800 border-gray-700 text-white mb-2"
-                        />
-                        <Input
-                            name="image2"
-                            placeholder="Second Image URL"
-                            className="bg-gray-800 border-gray-700 text-white mb-2"
-                        />
-                        <Input
-                            name="image3"
-                            placeholder="Third Image URL"
-                            className="bg-gray-800 border-gray-700 text-white"
-                        />
+                    <div className="space-y-4">
+                        <Label className="text-gray-200">Product Images</Label>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="image" className="text-xs text-gray-400">Main Image</Label>
+                                <Input
+                                    id="image"
+                                    name="image"
+                                    type="file"
+                                    accept="image/*"
+                                    className="bg-gray-800 border-gray-700 text-white cursor-pointer file:cursor-pointer file:text-white file:bg-gray-700 file:border-0 file:rounded-md file:px-2 file:mr-2 hover:file:bg-gray-600 transition-colors"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="image2" className="text-xs text-gray-400">Image 2</Label>
+                                <Input
+                                    id="image2"
+                                    name="image2"
+                                    type="file"
+                                    accept="image/*"
+                                    className="bg-gray-800 border-gray-700 text-white cursor-pointer file:cursor-pointer file:text-white file:bg-gray-700 file:border-0 file:rounded-md file:px-2 file:mr-2 hover:file:bg-gray-600 transition-colors"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="image3" className="text-xs text-gray-400">Image 3</Label>
+                                <Input
+                                    id="image3"
+                                    name="image3"
+                                    type="file"
+                                    accept="image/*"
+                                    className="bg-gray-800 border-gray-700 text-white cursor-pointer file:cursor-pointer file:text-white file:bg-gray-700 file:border-0 file:rounded-md file:px-2 file:mr-2 hover:file:bg-gray-600 transition-colors"
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     {state?.error && (
