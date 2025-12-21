@@ -37,13 +37,28 @@ export default function ProductEditForm({ product }: { product: any }) {
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="description" className="text-gray-200">JSON Description</Label>
+                <Label htmlFor="description" className="text-gray-200">Description</Label>
                 <textarea
                     id="description"
                     name="description"
                     rows={5}
                     className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-600"
-                    defaultValue={product.description}
+                    defaultValue={(() => {
+                        try {
+                            const parsed = JSON.parse(product.description || '{}')
+                            // If it parses as JSON object with detailed fields, maybe just show empty or try to extract something?
+                            // But user wants plain text. If legacy data is there, showing raw JSON might be confusing but necessary to not lose data?
+                            // OR, perhaps we just show raw string if it's not a JSON object, but if it IS, we show nothing or a specific field?
+                            // Actually, let's just show the raw content so they can edit it away from JSON if they want.
+                            // But wait, user said "description should not be json format".
+                            // If I return simple text, I wipe out the other JSON fields on save.
+                            // Given the requirement "description should not be json format", maybe I should just blank it out for new/migrating products?
+                            // Let's just return the raw string. If it's JSON, they'll see JSON. They can delete it and type text.
+                            return product.description
+                        } catch {
+                            return product.description
+                        }
+                    })()}
                 />
             </div>
 

@@ -53,21 +53,14 @@ export default function NewProductPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="description" className="text-gray-200">JSON Description (Category, Colors, Sizes)</Label>
+                        <Label htmlFor="description" className="text-gray-200">Description</Label>
                         <textarea
                             id="description"
                             name="description"
                             rows={5}
                             className="w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-600"
-                            defaultValue={JSON.stringify({
-                                category: "Leather Footwear",
-                                colors: [{ name: "Default", hex: "#000000" }],
-                                sizes: [37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47],
-                                rating: 5.0,
-                                reviewCount: 0
-                            }, null, 2)}
+                            placeholder="Enter product description..."
                         />
-                        <p className="text-xs text-gray-500">Must be valid JSON currently.</p>
                     </div>
 
                     <div className="space-y-2">

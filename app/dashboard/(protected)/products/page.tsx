@@ -32,7 +32,6 @@ export default async function ProductsPage() {
                                 <th className="px-6 py-4">Image</th>
                                 <th className="px-6 py-4">Name</th>
                                 <th className="px-6 py-4">Price</th>
-                                <th className="px-6 py-4">Category</th>
                                 <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
@@ -57,7 +56,6 @@ export default async function ProductsPage() {
                                         </td>
                                         <td className="px-6 py-4 font-medium text-white">{product.nom}</td>
                                         <td className="px-6 py-4">${Number(product.prix).toFixed(2)}</td>
-                                        <td className="px-6 py-4">{category}</td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex items-center justify-end gap-2">
                                                 <Link
