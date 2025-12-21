@@ -21,7 +21,7 @@ export function ProductCard({ product }: ProductCardProps) {
             src={product.images[0] || "/placeholder.svg"}
             alt={product.name}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="object-contain transition-transform duration-500 group-hover:scale-105"
           />
         </div>
         <CardContent className="p-6">

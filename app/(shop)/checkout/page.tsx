@@ -173,11 +173,29 @@ export default function CheckoutPage() {
         <h1 className="text-4xl md:text-5xl font-serif font-light mb-12">Checkout</h1>
 
         {/* PayPal SDK script */}
-        <Script
-          src={`https://www.paypal.com/sdk/js?client-id=${process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID}&currency=EUR`}
-          strategy="afterInteractive"
-          onLoad={() => setIsPaypalReady(true)}
-        />
+        {process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ? (
+          <Script
+            src={`https://www.paypal.com/sdk/js?client-id=${process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID}&currency=EUR`}
+            strategy="afterInteractive"
+            onLoad={() => {
+              console.log("PayPal SDK Loaded")
+              setIsPaypalReady(true)
+            }}
+            onError={(e) => {
+              console.error("PayPal SDK failed to load", e)
+              toast({
+                title: "PayPal Error",
+                description: "Failed to load PayPal secure checkout.",
+                variant: "destructive"
+              })
+            }}
+          />
+        ) : (
+          <div className="p-4 bg-amber-900/20 border border-amber-900/50 text-amber-500 rounded-lg mb-8">
+            <p className="font-medium">Payment Error: PayPal Client ID not configured.</p>
+            <p className="text-sm">Please set NEXT_PUBLIC_PAYPAL_CLIENT_ID in your environment.</p>
+          </div>
+        )}
 
         {/* Shipping form (used by PayPal on approval) */}
         <form id="checkout-form">
@@ -273,6 +291,11 @@ export default function CheckoutPage() {
 
                   {/* PayPal Button container */}
                   <div className="mt-4">
+                    {!isPaypalReady && process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID && (
+                      <div className="h-10 w-full bg-gray-800 animate-pulse rounded-md flex items-center justify-center text-xs text-gray-500">
+                        Initializing PayPal...
+                      </div>
+                    )}
                     <div ref={paypalRef} />
                     {isProcessing && (
                       <Button disabled className="w-full mt-4">

@@ -3,6 +3,7 @@ import pool from "@/lib/db"
 import Link from "next/link"
 import { Plus, Pencil, Trash2 } from "lucide-react"
 import { deleteProduct } from "./actions"
+import { DeleteProductButton } from "./delete-button"
 
 async function getProducts(query?: string) {
     let sql = 'SELECT * FROM produit'
@@ -81,15 +82,11 @@ export default async function ProductsPage({
                                                 >
                                                     <Pencil size={18} />
                                                 </Link>
-                                                <form action={deleteProduct}>
-                                                    <input type="hidden" name="id" value={product.id_produit} />
-                                                    <button
-                                                        type="submit"
-                                                        className="p-2 text-red-400 hover:bg-red-900/20 rounded-lg transition-colors"
-                                                    >
-                                                        <Trash2 size={18} />
-                                                    </button>
-                                                </form>
+                                                <DeleteProductButton
+                                                    productId={product.id_produit}
+                                                    productName={product.nom}
+                                                    deleteAction={deleteProduct}
+                                                />
                                             </div>
                                         </td>
                                     </tr>

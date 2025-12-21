@@ -182,7 +182,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     alt={product.name}
                     fill
                     sizes="(max-width: 768px) 100vw, 50vw"
-                    className="object-cover"
+                    className="object-contain"
                     priority
                     onLoad={() => {
                       const imgSrc = product.images[selectedImage] || product.images[0]
