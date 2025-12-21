@@ -29,7 +29,7 @@ export default function NewProductPage() {
             </div>
 
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-                <form action={formAction} className="space-y-6">
+                <form action={formAction} encType="multipart/form-data" className="space-y-6">
                     <div className="space-y-2">
                         <Label htmlFor="name" className="text-gray-200">Product Name</Label>
                         <Input
