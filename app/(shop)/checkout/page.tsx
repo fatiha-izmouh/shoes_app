@@ -18,8 +18,9 @@ declare global {
 }
 
 export default function CheckoutPage() {
-  const { cart, getCartTotal, clearCart } = useCart()
+  const { cart, getCartTotal, getShippingTotal, clearCart } = useCart()
   const router = useRouter()
+
   const { toast } = useToast()
   const [isProcessing, setIsProcessing] = useState(false)
   const [isPaypalReady, setIsPaypalReady] = useState(false)
@@ -59,8 +60,9 @@ export default function CheckoutPage() {
           return actions.resolve()
         },
         createOrder: (_data: any, actions: any) => {
-          const totalWithTax = (getCartTotal() * 1.1).toFixed(2)
+          const totalWithTax = (getCartTotal() + getShippingTotal()).toFixed(2)
           return actions.order.create({
+
             purchase_units: [
               {
                 amount: {
@@ -94,7 +96,8 @@ export default function CheckoutPage() {
             }
 
             // Calculate total with tax (same calculation as in createOrder)
-            const totalWithTax: number = getCartTotal() * 1.1
+            const totalWithTax: number = getCartTotal() + getShippingTotal()
+
 
             // Prepare order data to save in your database
             const orderData = {
@@ -277,16 +280,17 @@ export default function CheckoutPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Shipping</span>
-                      <span className="font-medium">Free</span>
+                      <span className="font-medium">${getShippingTotal().toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Tax</span>
-                      <span className="font-medium">${(getCartTotal() * 0.1).toFixed(2)}</span>
+                      <span className="font-medium">$0.00</span>
                     </div>
                     <div className="pt-2 border-t border-border flex justify-between">
                       <span className="font-medium text-lg">Total</span>
-                      <span className="font-serif text-2xl">${(getCartTotal() * 1.1).toFixed(2)}</span>
+                      <span className="font-serif text-2xl">${(getCartTotal() + getShippingTotal()).toFixed(2)}</span>
                     </div>
+
                   </div>
 
                   {/* PayPal Button container */}
