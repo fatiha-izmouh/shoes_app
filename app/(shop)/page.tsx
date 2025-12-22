@@ -13,7 +13,7 @@ export default async function Home() {
     <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative h-[80vh] min-h-[600px] flex items-center justify-center overflow-hidden">
-        <Image src="/images/home_pic.jpg" alt="Handcrafted Leather Market" fill className="object-cover" priority />
+        <Image src="/images/image.png" alt="Handcrafted Leather Market" fill className="object-cover" priority />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/60" />
         <div className="relative z-10 container mx-auto px-4 text-center">
           <h1 className="text-5xl md:text-7xl font-serif font-light mb-6 text-white text-balance">
