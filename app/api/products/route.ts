@@ -64,7 +64,9 @@ export async function GET() {
           ? row.description
           : "Handcrafted leather footwear with exceptional quality.",
         price: parseFloat(row.prix.toString()),
+        shippingCost: row.frais_livraison ? parseFloat(row.frais_livraison.toString()) : 0,
         category: additionalData.category,
+
         images: productImages,
         colors: additionalData.colors,
         sizes: availableSizes.length > 0 ? availableSizes : additionalData.sizes,

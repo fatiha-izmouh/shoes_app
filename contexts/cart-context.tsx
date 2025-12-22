@@ -19,6 +19,7 @@ interface CartContextType {
   updateQuantity: (productId: string, colorName: string, size: number, quantity: number) => void
   clearCart: () => void
   getCartTotal: () => number
+  getShippingTotal: () => number
   getCartCount: () => number
 }
 
@@ -120,6 +121,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return cart.reduce((total, item) => total + item.product.price * item.quantity, 0)
   }
 
+  const getShippingTotal = () => {
+    return cart.reduce((total, item) => total + (item.product.shippingCost || 0) * item.quantity, 0)
+  }
+
+
   const getCartCount = () => {
     return cart.reduce((count, item) => count + item.quantity, 0)
   }
@@ -133,8 +139,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         updateQuantity,
         clearCart,
         getCartTotal,
+        getShippingTotal,
         getCartCount,
       }}
+
     >
       {children}
     </CartContext.Provider>

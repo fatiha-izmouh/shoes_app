@@ -45,9 +45,10 @@ export async function createProduct(prevState: any, formData: FormData) {
         }
 
         await pool.query(
-            'INSERT INTO produit (nom, description, prix, image, image2, image3) VALUES (?, ?, ?, ?, ?, ?)',
-            [name, description, price, image, image2, image3]
+            'INSERT INTO produit (nom, description, prix, frais_livraison, image, image2, image3) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [name, description, price, shipping, image, image2, image3]
         )
+
         revalidatePath('/dashboard/products')
         return { success: true }
     } catch (error: any) {
@@ -60,13 +61,16 @@ export async function updateProduct(id: number, prevState: any, formData: FormDa
     const name = formData.get('name')
     const description = formData.get('description')
     const price = formData.get('price')
+    const shipping = formData.get('shipping') || 0
+
 
     try {
         // Get existing product to keep images if not updated
         // Ideally we pass existing images as hidden fields or fetch them here.
         // Fetching is safer.
-        const [existing] = await pool.query('SELECT image, image2, image3 FROM produit WHERE id_produit = ?', [id]) as any
+        const [existing] = await pool.query('SELECT image, image2, image3, frais_livraison FROM produit WHERE id_produit = ?', [id]) as any
         if (!existing || existing.length === 0) {
+
             return { error: 'Product not found' }
         }
         const current = existing[0]
@@ -80,9 +84,10 @@ export async function updateProduct(id: number, prevState: any, formData: FormDa
         const image3 = (image3File && image3File.size > 0) ? await uploadImage(image3File) : current.image3
 
         await pool.query(
-            'UPDATE produit SET nom = ?, description = ?, prix = ?, image = ?, image2 = ?, image3 = ? WHERE id_produit = ?',
-            [name, description, price, image, image2, image3, id]
+            'UPDATE produit SET nom = ?, description = ?, prix = ?, frais_livraison = ?, image = ?, image2 = ?, image3 = ? WHERE id_produit = ?',
+            [name, description, price, shipping, image, image2, image3, id]
         )
+
         revalidatePath('/dashboard/products')
         revalidatePath(`/dashboard/products/${id}`)
         return { success: true }

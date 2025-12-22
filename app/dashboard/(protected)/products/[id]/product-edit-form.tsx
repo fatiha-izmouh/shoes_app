@@ -66,6 +66,20 @@ export default function ProductEditForm({ product }: { product: any }) {
             </div>
 
             <div className="space-y-2">
+                <Label htmlFor="shipping" className="text-gray-200">Shipping Cost</Label>
+                <Input
+                    id="shipping"
+                    name="shipping"
+                    type="number"
+                    step="0.01"
+                    defaultValue={product.frais_livraison || 0}
+                    required
+                    className="bg-gray-800 border-gray-700 text-white"
+                />
+            </div>
+
+
+            <div className="space-y-2">
                 <Label htmlFor="description" className="text-gray-200">Description</Label>
                 <textarea
                     id="description"

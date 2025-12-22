@@ -1,0 +1,1 @@
+ALTER TABLE produit ADD COLUMN frais_livraison DECIMAL(10, 2) DEFAULT 0.00;

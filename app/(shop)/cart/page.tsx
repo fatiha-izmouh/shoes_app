@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { useCart } from "@/contexts/cart-context"
 
 export default function CartPage() {
-  const { cart, removeFromCart, updateQuantity, getCartTotal } = useCart()
+  const { cart, removeFromCart, updateQuantity, getCartTotal, getShippingTotal } = useCart()
 
   if (cart.length === 0) {
     return (
@@ -113,16 +113,17 @@ export default function CartPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Shipping</span>
-                    <span className="font-medium">Free</span>
+                    <span className="font-medium">${getShippingTotal().toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Tax</span>
-                    <span className="font-medium">${(getCartTotal() * 0.1).toFixed(2)}</span>
+                    <span className="font-medium">$0.00</span>
                   </div>
                   <div className="pt-4 border-t border-border flex justify-between">
                     <span className="font-medium text-lg">Total</span>
-                    <span className="font-serif text-2xl">${(getCartTotal() * 1.1).toFixed(2)}</span>
+                    <span className="font-serif text-2xl">${(getCartTotal() + getShippingTotal()).toFixed(2)}</span>
                   </div>
+
                 </div>
                 <Link href="/checkout">
                   <Button size="lg" className="w-full">

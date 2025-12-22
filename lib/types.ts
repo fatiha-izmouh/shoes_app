@@ -4,6 +4,8 @@ export interface Product {
   description: string
   price: number
   category: string
+  shippingCost?: number // Shipping cost
+
   images: string[]
   colors: Color[]
   sizes: number[]

@@ -44,7 +44,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     // Database stores paths like: /images/products/nike-air.png
     // Next.js serves files from public/ folder automatically
     let productImages: string[] = []
-    
+
     // Collect all images from database columns (image, image2, image3)
     // Filter out null, undefined, or empty strings
     if (row.image && row.image.trim() !== "") {
@@ -56,12 +56,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     if (row.image3 && row.image3.trim() !== "") {
       productImages.push(row.image3.trim())
     }
-    
+
     // Fallback to JSON description images if database columns are empty
     if (productImages.length === 0 && additionalData.images && additionalData.images.length > 0) {
       productImages = additionalData.images.filter((img: string) => img && img.trim() !== "")
     }
-    
+
     // Log for debugging
     console.log(`Product ${productId} images from DB:`, {
       image: row.image,
@@ -69,26 +69,28 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       image3: row.image3,
       productImagesBeforePadding: productImages,
     })
-    
+
     // Ensure we always have exactly 3 images (pad with placeholder if needed)
     // Only pad if columns are actually empty - don't replace existing values
     while (productImages.length < 3) {
       productImages.push("/placeholder.svg")
     }
-    
+
     // Take only first 3 images (image, image2, image3)
     productImages = productImages.slice(0, 3)
-    
+
     console.log(`Product ${productId} final images array:`, productImages)
 
     const product: Product = {
       id: row.id_produit.toString(),
       name: row.nom,
-      description: typeof row.description === "string" && !row.description.startsWith("{") 
-        ? row.description 
+      description: typeof row.description === "string" && !row.description.startsWith("{")
+        ? row.description
         : "Handcrafted leather footwear with exceptional quality.",
       price: parseFloat(row.prix.toString()),
+      shippingCost: row.frais_livraison ? parseFloat(row.frais_livraison.toString()) : 0,
       category: additionalData.category,
+
       images: productImages,
       colors: additionalData.colors,
       sizes: additionalData.sizes,
