@@ -24,6 +24,8 @@ export async function createProduct(prevState: any, formData: FormData) {
     const name = formData.get('name')
     const description = formData.get('description')
     const price = formData.get('price')
+    const shipping = formData.get('shipping') || 0
+
 
     const imageFile = formData.get('image') as File
     const image2File = formData.get('image2') as File
