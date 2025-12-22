@@ -1,14 +1,43 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { updateProduct } from '../actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import Image from 'next/image'
 
 export default function ProductEditForm({ product }: { product: any }) {
     const updateProductWithId = updateProduct.bind(null, product.id_produit)
     const [state, formAction, isPending] = useActionState(updateProductWithId, null)
+    const [imagePreviews, setImagePreviews] = useState<{
+        image: string | null
+        image2: string | null
+        image3: string | null
+    }>({
+        image: null,
+        image2: null,
+        image3: null,
+    })
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'image' | 'image2' | 'image3') => {
+        const file = e.target.files?.[0]
+        if (file) {
+            const reader = new FileReader()
+            reader.onloadend = () => {
+                setImagePreviews(prev => ({
+                    ...prev,
+                    [field]: reader.result as string
+                }))
+            }
+            reader.readAsDataURL(file)
+        } else {
+            setImagePreviews(prev => ({
+                ...prev,
+                [field]: null
+            }))
+        }
+    }
 
     return (
         <form action={formAction} className="space-y-6">
@@ -67,46 +96,61 @@ export default function ProductEditForm({ product }: { product: any }) {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="image" className="text-xs text-gray-400">Main Image</Label>
-                        {product.image && (
-                            <div className="relative aspect-square w-20 rounded-md overflow-hidden bg-gray-800 border border-gray-700 mb-2">
-                                <img src={product.image} alt="Main" className="object-cover w-full h-full" />
-                            </div>
-                        )}
+                        <div className="relative aspect-square w-full rounded-md overflow-hidden bg-gray-800 border border-gray-700 mb-2">
+                            {imagePreviews.image ? (
+                                <Image src={imagePreviews.image} alt="New Main" fill className="object-cover" />
+                            ) : product.image ? (
+                                <img src={product.image} alt="Current Main" className="object-cover w-full h-full" />
+                            ) : (
+                                <div className="flex items-center justify-center h-full text-gray-500 text-xs">No image</div>
+                            )}
+                        </div>
                         <Input
                             id="image"
                             name="image"
                             type="file"
                             accept="image/*"
+                            onChange={(e) => handleImageChange(e, 'image')}
                             className="bg-gray-800 border-gray-700 text-white cursor-pointer file:cursor-pointer file:text-white file:bg-gray-700 file:border-0 file:rounded-md file:px-2 file:mr-2 hover:file:bg-gray-600 transition-colors"
                         />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="image2" className="text-xs text-gray-400">Image 2</Label>
-                        {product.image2 && (
-                            <div className="relative aspect-square w-20 rounded-md overflow-hidden bg-gray-800 border border-gray-700 mb-2">
-                                <img src={product.image2} alt="Second" className="object-cover w-full h-full" />
-                            </div>
-                        )}
+                        <div className="relative aspect-square w-full rounded-md overflow-hidden bg-gray-800 border border-gray-700 mb-2">
+                            {imagePreviews.image2 ? (
+                                <Image src={imagePreviews.image2} alt="New Image 2" fill className="object-cover" />
+                            ) : product.image2 ? (
+                                <img src={product.image2} alt="Current Image 2" className="object-cover w-full h-full" />
+                            ) : (
+                                <div className="flex items-center justify-center h-full text-gray-500 text-xs">No image</div>
+                            )}
+                        </div>
                         <Input
                             id="image2"
                             name="image2"
                             type="file"
                             accept="image/*"
+                            onChange={(e) => handleImageChange(e, 'image2')}
                             className="bg-gray-800 border-gray-700 text-white cursor-pointer file:cursor-pointer file:text-white file:bg-gray-700 file:border-0 file:rounded-md file:px-2 file:mr-2 hover:file:bg-gray-600 transition-colors"
                         />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="image3" className="text-xs text-gray-400">Image 3</Label>
-                        {product.image3 && (
-                            <div className="relative aspect-square w-20 rounded-md overflow-hidden bg-gray-800 border border-gray-700 mb-2">
-                                <img src={product.image3} alt="Third" className="object-cover w-full h-full" />
-                            </div>
-                        )}
+                        <div className="relative aspect-square w-full rounded-md overflow-hidden bg-gray-800 border border-gray-700 mb-2">
+                            {imagePreviews.image3 ? (
+                                <Image src={imagePreviews.image3} alt="New Image 3" fill className="object-cover" />
+                            ) : product.image3 ? (
+                                <img src={product.image3} alt="Current Image 3" className="object-cover w-full h-full" />
+                            ) : (
+                                <div className="flex items-center justify-center h-full text-gray-500 text-xs">No image</div>
+                            )}
+                        </div>
                         <Input
                             id="image3"
                             name="image3"
                             type="file"
                             accept="image/*"
+                            onChange={(e) => handleImageChange(e, 'image3')}
                             className="bg-gray-800 border-gray-700 text-white cursor-pointer file:cursor-pointer file:text-white file:bg-gray-700 file:border-0 file:rounded-md file:px-2 file:mr-2 hover:file:bg-gray-600 transition-colors"
                         />
                     </div>
