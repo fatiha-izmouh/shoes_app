@@ -29,6 +29,9 @@ export function ProductCard({ product }: ProductCardProps) {
             <h3 className="font-medium text-balance leading-tight">{product.name}</h3>
             <p className="font-serif text-lg whitespace-nowrap">${product.price}</p>
           </div>
+          <p className="text-sm text-muted-foreground line-clamp-1 mb-3">
+            {product.description.startsWith('{') ? "Handcrafted leather footwear" : product.description}
+          </p>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1">
               <Star className="h-4 w-4 fill-current text-yellow-500" />
