@@ -29,10 +29,20 @@ export async function createProduct(prevState: any, formData: FormData) {
     const image2File = formData.get('image2') as File
     const image3File = formData.get('image3') as File
 
+    // Validate that main image is provided
+    if (!imageFile || imageFile.size === 0) {
+        return { error: 'Main product image is required. Please upload at least one image.' }
+    }
+
     try {
         const image = await uploadImage(imageFile)
         const image2 = await uploadImage(image2File)
         const image3 = await uploadImage(image3File)
+
+        // Double-check that main image was uploaded successfully
+        if (!image) {
+            return { error: 'Failed to upload main image. Please try again.' }
+        }
 
         await pool.query(
             'INSERT INTO produit (nom, description, prix, image, image2, image3) VALUES (?, ?, ?, ?, ?, ?)',
