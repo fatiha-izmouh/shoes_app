@@ -11,7 +11,9 @@ export async function uploadImage(file: File | null): Promise<string | null> {
         const buffer = Buffer.from(await file.arrayBuffer())
         const ext = path.extname(file.name) || '.jpg'
         const filename = `${uuidv4()}${ext}`
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads')
+
+        // Save to project_root/uploads (persistent storage)
+        const uploadDir = path.join(process.cwd(), 'uploads')
 
         // Ensure directory exists
         await mkdir(uploadDir, { recursive: true })
@@ -20,7 +22,9 @@ export async function uploadImage(file: File | null): Promise<string | null> {
         await writeFile(filePath, buffer)
 
         console.log(`[Upload] Successfully saved: ${filename}`)
-        return `/uploads/${filename}`
+
+        // Return URL to our new API route
+        return `/api/images/${filename}`
     } catch (error) {
         console.error('[Upload Error]', error)
         throw error // Re-throw to be caught by the action
