@@ -61,7 +61,7 @@ export default async function Home() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="relative aspect-[4/3] overflow-hidden rounded-lg">
               <Image
-                src="/images/capture-20d-27-c3-a9cran-202025-12-16-20140210.png"
+                src="/images/image.png"
                 alt="Handcrafted Leatherwork"
                 fill
                 className="object-cover"

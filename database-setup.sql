@@ -7,9 +7,9 @@
 
 INSERT INTO produit (nom, description, prix, image, image2, image3) VALUES
 ('Medieval Fantasy Leather Boot', 
- '{"colors": [{"name": "Dark Brown", "hex": "#4a2511", "image": "/images/capture-20d-27-c3-a9cran-202025-12-16-20140210.png"}], "sizes": [6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12], "category": "Leather Footwear", "rating": 4.9, "reviewCount": 87}',
+ '{"colors": [{"name": "Dark Brown", "hex": "#4a2511", "image": "/images/image.png"}], "sizes": [6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12], "category": "Leather Footwear", "rating": 4.9, "reviewCount": 87}',
  180.00,
- '/images/capture-20d-27-c3-a9cran-202025-12-16-20140210.png',  -- Main image
+ '/images/image.png',  -- Main image
  '/images/capture-20d-27-c3-a9cran-202025-12-16-20140125.png',  -- Second image
  '/images/capture-20d-27-c3-a9cran-202025-12-16-20140132.png'),  -- Third image
 ('Wrapped Leather Knee Boot',

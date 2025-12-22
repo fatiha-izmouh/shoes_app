@@ -17,7 +17,7 @@ export const products: Product[] = [
       {
         name: "Dark Brown",
         hex: "#4a2511",
-        image: "/images/capture-20d-27-c3-a9cran-202025-12-16-20140210.png",
+        image: "/images/image.png",
       },
       {
         name: "Rich Mahogany",
