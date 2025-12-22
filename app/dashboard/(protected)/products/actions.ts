@@ -63,7 +63,7 @@ export async function updateProduct(id: number, prevState: any, formData: FormDa
     const price = formData.get('price')
     const shipping = formData.get('shipping') || 0
 
-    const shipping = formData.get('shipping') || 0
+
 
 
     try {
