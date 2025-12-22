@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { use } from "react"
 import Image from "next/image"
 import Link from "next/link"
@@ -20,6 +20,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
   const [stock, setStock] = useState<Record<string, number>>({})
+
+  // Ref for the image scroll container
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   // All hooks must be called before any conditional returns
   const [selectedImage, setSelectedImage] = useState(0)
@@ -167,42 +170,53 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         <div className="grid md:grid-cols-2 gap-12">
           {/* Images */}
           <div className="space-y-4">
-            {/* Main Image with Arrow Navigation */}
-            <div className="relative aspect-square overflow-hidden bg-muted rounded-lg border border-border group">
+            {/* Main Image Carousel with Scroll Snap */}
+            <div className="relative aspect-square bg-muted rounded-lg border border-border group">
               {product.images && product.images.length > 0 ? (
                 <>
-                  {/* Debug: Show image path (only in dev, positioned to not cover image) */}
-                  {process.env.NODE_ENV === 'development' && (
-                    <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs p-1 rounded z-10">
-                      {product.images[selectedImage] || product.images[0]}
-                    </div>
-                  )}
-                  <Image
-                    src={product.images[selectedImage] || product.images[0] || "/placeholder.svg"}
-                    alt={product.name}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="object-contain"
-                    priority
-                    onLoad={() => {
-                      const imgSrc = product.images[selectedImage] || product.images[0]
-                      console.log("✅ Main image loaded successfully:", imgSrc)
+                  <div
+                    ref={scrollContainerRef}
+                    onScroll={(e) => {
+                      const container = e.currentTarget
+                      const index = Math.round(container.scrollLeft / container.clientWidth)
+                      if (index !== selectedImage) {
+                        setSelectedImage(index)
+                      }
                     }}
-                    onError={(e) => {
-                      console.error("❌ Main image failed to load:", e.currentTarget.src)
-                      console.error("Available images:", product.images)
-                      console.error("Selected image index:", selectedImage)
-                    }}
-                  />
+                    className="flex w-full h-full overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden"
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                  >
+                    {product.images.map((image, index) => (
+                      <div key={index} className="w-full h-full flex-shrink-0 snap-center relative flex items-center justify-center">
+                        <Image
+                          src={image || "/placeholder.svg"}
+                          alt={`${product.name} view ${index + 1}`}
+                          fill
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                          className="object-contain p-2"
+                          priority={index === 0}
+                        />
+                      </div>
+                    ))}
+                  </div>
 
-                  {/* Navigation Arrows - Only show if more than 1 image */}
+                  {/* Navigation Arrows - Only show if more than 1 image (Desktop primarily) */}
                   {product.images.length > 1 && (
                     <>
                       {/* Left Arrow */}
                       <button
                         type="button"
-                        onClick={() => setSelectedImage((prev) => (prev === 0 ? product.images.length - 1 : prev - 1))}
-                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all opacity-0 group-hover:opacity-100"
+                        onClick={() => {
+                          const newIndex = selectedImage === 0 ? product.images.length - 1 : selectedImage - 1
+                          if (scrollContainerRef.current) {
+                            scrollContainerRef.current.scrollTo({
+                              left: newIndex * scrollContainerRef.current.clientWidth,
+                              behavior: 'smooth'
+                            })
+                          }
+                          setSelectedImage(newIndex)
+                        }}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all opacity-0 group-hover:opacity-100 hidden md:block"
                         aria-label="Previous image"
                       >
                         <ChevronLeft className="h-6 w-6" />
@@ -211,8 +225,17 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                       {/* Right Arrow */}
                       <button
                         type="button"
-                        onClick={() => setSelectedImage((prev) => (prev === product.images.length - 1 ? 0 : prev + 1))}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all opacity-0 group-hover:opacity-100"
+                        onClick={() => {
+                          const newIndex = selectedImage === product.images.length - 1 ? 0 : selectedImage + 1
+                          if (scrollContainerRef.current) {
+                            scrollContainerRef.current.scrollTo({
+                              left: newIndex * scrollContainerRef.current.clientWidth,
+                              behavior: 'smooth'
+                            })
+                          }
+                          setSelectedImage(newIndex)
+                        }}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all opacity-0 group-hover:opacity-100 hidden md:block"
                         aria-label="Next image"
                       >
                         <ChevronLeft className="h-6 w-6 rotate-180" />
@@ -224,20 +247,27 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 <div className="flex items-center justify-center h-full text-muted-foreground">
                   <div className="text-center">
                     <p>No image available</p>
-                    <p className="text-xs mt-2">Images array: {product.images?.length || 0}</p>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Dot Indicators - Only show if more than 1 image */}
+            {/* Dot Indicators */}
             {product.images && product.images.length > 1 && (
               <div className="flex justify-center gap-2">
                 {product.images.map((_, index) => (
                   <button
                     key={index}
                     type="button"
-                    onClick={() => setSelectedImage(index)}
+                    onClick={() => {
+                      setSelectedImage(index)
+                      if (scrollContainerRef.current) {
+                        scrollContainerRef.current.scrollTo({
+                          left: index * scrollContainerRef.current.clientWidth,
+                          behavior: 'smooth'
+                        })
+                      }
+                    }}
                     className={`h-2 rounded-full transition-all ${selectedImage === index
                       ? "w-8 bg-primary"
                       : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
@@ -271,7 +301,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
             <p className="text-3xl font-serif mb-6">${product.price}</p>
 
-            <p className="text-muted-foreground leading-relaxed mb-8">{product.description}</p>
+            {/* Description - Desktop Only */}
+            <p className="text-muted-foreground leading-relaxed mb-8 hidden md:block">{product.description}</p>
 
             {/* Color Selection */}
             <div className="mb-8">
@@ -317,16 +348,14 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                       })
                     }}
                     onMeasurementsSubmit={(measurements) => {
-                      // Map the string measurements to numbers for our CustomMeasurements interface
                       setCustomMeasurements({
                         footLength: parseFloat(measurements.length) || 0,
                         footWidth: parseFloat(measurements.width) || 0,
-                        archHeight: 0, // Not currently captured by UI but needed for interface
+                        archHeight: 0,
                         heelToBall: 0,
                         instepCircumference: parseFloat(measurements.instepCircumference) || 0,
-                        calculatedSize: parseFloat(measurements.length) * 1.5 + 1.5 // Rough calc, overridden by onSizeSelect
+                        calculatedSize: parseFloat(measurements.length) * 1.5 + 1.5
                       })
-                      console.log("Captured custom measurements:", measurements)
                     }}
                   />
                 </div>
@@ -375,6 +404,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                       variant="outline"
                       size="sm"
                       onClick={() => setIsCustomizeMode(false)}
+                      className="text-xs h-8"
                     >
                       Change
                     </Button>
@@ -435,6 +465,12 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               >
                 Buy Now
               </Button>
+            </div>
+
+            {/* Description - Mobile Only (Below interactions) */}
+            <div className="block md:hidden mb-8">
+              <h3 className="text-lg font-medium mb-2">Description</h3>
+              <p className="text-muted-foreground leading-relaxed">{product.description}</p>
             </div>
 
             {/* Product Details */}
