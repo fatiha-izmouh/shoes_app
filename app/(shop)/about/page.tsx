@@ -10,7 +10,7 @@ export default function AboutPage() {
         <p className="text-xl text-muted-foreground mb-12 text-balance">Crafting exceptional footwear since 1985</p>
 
         <div className="relative aspect-[16/9] mb-12 overflow-hidden rounded-lg">
-          <Image src="/luxury-shoe-workshop-artisan-craftsmanship.jpg" alt="Our Workshop" fill className="object-cover" />
+          <Image src="/images/home_pic.jpg" alt="Our Workshop" fill className="object-cover" />
         </div>
 
         <div className="space-y-8 mb-16">

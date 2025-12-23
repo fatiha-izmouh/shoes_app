@@ -45,11 +45,25 @@ export default function CheckoutPage() {
 
   // 2. Hook for PayPal initialization
   useEffect(() => {
-    if (!isPaypalReady || !window.paypal || !paypalRef.current || cart.length === 0) return
+    if (!isPaypalReady || !window.paypal || !paypalRef.current || cart.length === 0) {
+      console.log("[PayPal] Waiting for initialization:", {
+        isPaypalReady,
+        hasPaypalSDK: !!window.paypal,
+        hasPaypalRef: !!paypalRef.current,
+        cartLength: cart.length
+      })
+      return
+    }
+
+    // Clear any existing PayPal buttons first
+    if (paypalRef.current) {
+      paypalRef.current.innerHTML = ''
+    }
 
     let paypalButtons: any = null
 
     try {
+      console.log("[PayPal] Initializing PayPal buttons...")
       paypalButtons = window.paypal.Buttons({
         style: {
           layout: 'vertical',
@@ -170,12 +184,32 @@ export default function CheckoutPage() {
             description: "There was a problem with the payment window.",
             variant: "destructive",
           })
+          setIsProcessing(false)
         }
       })
 
-      paypalButtons.render(paypalRef.current)
+      if (paypalRef.current && paypalButtons.isEligible()) {
+        console.log("[PayPal] Rendering buttons...")
+        paypalButtons.render(paypalRef.current).then(() => {
+          console.log("[PayPal] Buttons rendered successfully!")
+        }).catch((err: any) => {
+          console.error("[PayPal] Failed to render buttons:", err)
+          toast({
+            title: "PayPal Error",
+            description: "Failed to initialize PayPal. Please refresh the page.",
+            variant: "destructive"
+          })
+        })
+      } else {
+        console.error("[PayPal] Buttons not eligible or container not found")
+      }
     } catch (error) {
       console.error("[PayPal Initialization Error]", error)
+      toast({
+        title: "PayPal Error",
+        description: "Failed to initialize PayPal. Please refresh the page.",
+        variant: "destructive"
+      })
     }
 
     return () => {
