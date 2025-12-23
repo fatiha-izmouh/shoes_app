@@ -33,21 +33,21 @@ type ActionType = typeof actionTypes
 
 type Action =
   | {
-      type: ActionType['ADD_TOAST']
-      toast: ToasterToast
-    }
+    type: ActionType['ADD_TOAST']
+    toast: ToasterToast
+  }
   | {
-      type: ActionType['UPDATE_TOAST']
-      toast: Partial<ToasterToast>
-    }
+    type: ActionType['UPDATE_TOAST']
+    toast: Partial<ToasterToast>
+  }
   | {
-      type: ActionType['DISMISS_TOAST']
-      toastId?: ToasterToast['id']
-    }
+    type: ActionType['DISMISS_TOAST']
+    toastId?: ToasterToast['id']
+  }
   | {
-      type: ActionType['REMOVE_TOAST']
-      toastId?: ToasterToast['id']
-    }
+    type: ActionType['REMOVE_TOAST']
+    toastId?: ToasterToast['id']
+  }
 
 interface State {
   toasts: ToasterToast[]
@@ -105,9 +105,9 @@ export const reducer = (state: State, action: Action): State => {
         toasts: state.toasts.map((t) =>
           t.id === toastId || toastId === undefined
             ? {
-                ...t,
-                open: false,
-              }
+              ...t,
+              open: false,
+            }
             : t,
         ),
       }
@@ -139,40 +139,53 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, 'id'>
 
-  const toast = React.useCallback(({ ...props }: Toast) => {
-    const id = genId()
+function toast({ ...props }: Toast) {
+  const id = genId()
 
-    const update = (props: ToasterToast) =>
-      dispatch({
-        type: 'UPDATE_TOAST',
-        toast: { ...props, id },
-      })
-    const dismiss = () => dispatch({ type: 'DISMISS_TOAST', toastId: id })
-
+  const update = (props: ToasterToast) =>
     dispatch({
-      type: 'ADD_TOAST',
-      toast: {
-        ...props,
-        id,
-        open: true,
-        onOpenChange: (open) => {
-          if (!open) dismiss()
-        },
-      },
+      type: 'UPDATE_TOAST',
+      toast: { ...props, id },
     })
+  const dismiss = () => dispatch({ type: 'DISMISS_TOAST', toastId: id })
 
-    return {
-      id: id,
-      dismiss,
-      update,
+  dispatch({
+    type: 'ADD_TOAST',
+    toast: {
+      ...props,
+      id,
+      open: true,
+      onOpenChange: (open) => {
+        if (!open) dismiss()
+      },
+    },
+  })
+
+  return {
+    id: id,
+    dismiss,
+    update,
+  }
+}
+
+function useToast() {
+  const [state, setState] = React.useState<State>(memoryState)
+
+  React.useEffect(() => {
+    listeners.push(setState)
+    return () => {
+      const index = listeners.indexOf(setState)
+      if (index > -1) {
+        listeners.splice(index, 1)
+      }
     }
-  }, [])
+  }, [state])
 
   return React.useMemo(() => ({
     ...state,
     toast,
     dismiss: (toastId?: string) => dispatch({ type: 'DISMISS_TOAST', toastId }),
-  }), [state, toast])
+  }), [state])
 }
 
 export { useToast, toast }
