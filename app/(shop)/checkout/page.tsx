@@ -99,6 +99,7 @@ export default function CheckoutPage() {
             const firstName = (formData.get("firstName") as string) || ""
             const lastName = (formData.get("lastName") as string) || ""
             const email = (formData.get("email") as string) || ""
+            const phone = (formData.get("phone") as string) || ""
             const address = (formData.get("address") as string) || ""
             const city = (formData.get("city") as string) || ""
             const zip = (formData.get("zip") as string) || ""
@@ -108,6 +109,7 @@ export default function CheckoutPage() {
             const orderData = {
               nom_client: `${firstName} ${lastName}`,
               email,
+              telephone: phone,
               adresse: fullAddress,
               items: cartRef.current.map((item) => ({
                 id_produit: parseInt(item.product.id),
@@ -250,6 +252,10 @@ export default function CheckoutPage() {
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
                     <Input id="email" name="email" type="email" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input id="phone" name="phone" type="tel" required />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="address">Address</Label>
