@@ -36,6 +36,15 @@ export default function CheckoutPage() {
   const cartTotal = getCartTotal()
   const shippingTotal = getShippingTotal()
 
+  // Use refs for totals to avoid PayPal re-initialization
+  const cartTotalRef = useRef(cartTotal)
+  const shippingTotalRef = useRef(shippingTotal)
+
+  useEffect(() => {
+    cartTotalRef.current = cartTotal
+    shippingTotalRef.current = shippingTotal
+  }, [cartTotal, shippingTotal])
+
   // 1. Hook for redirection
   useEffect(() => {
     if (cart.length === 0) {
@@ -81,7 +90,8 @@ export default function CheckoutPage() {
           return actions.resolve()
         },
         createOrder: (_data: any, actions: any) => {
-          const totalAmount = (cartTotal + shippingTotal).toFixed(2)
+          // Use refs to get the latest values without re-rendering
+          const totalAmount = (cartTotalRef.current + shippingTotalRef.current).toFixed(2)
           console.log("[PayPal] Creating order for amount:", totalAmount)
           return actions.order.create({
             purchase_units: [{
@@ -135,7 +145,7 @@ export default function CheckoutPage() {
                 isCustomSize: item.isCustomSize
               })),
               payment: {
-                montant: parseFloat((cartTotal + shippingTotal).toFixed(2)),
+                montant: parseFloat((cartTotalRef.current + shippingTotalRef.current).toFixed(2)),
                 methode: "paypal",
                 statut: "completed",
               },
@@ -217,8 +227,9 @@ export default function CheckoutPage() {
         paypalButtons.close()
       }
     }
+    // Only re-run if PayPal SDK becomes ready - NOT when cart totals change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPaypalReady, cartTotal, shippingTotal, toast, router])
+  }, [isPaypalReady])
 
   // !! ALL HOOKS MUST BE DECLARED ABOVE THIS LINE !!
   if (cart.length === 0) {
