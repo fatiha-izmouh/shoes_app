@@ -16,7 +16,7 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "VALKYLEATHER - Premium Designer Footwear",
   description:
-    "Discover exceptional footwear where Italian craftsmanship meets timeless elegance. Handcrafted luxury shoes since 1985.",
+    "Discover exceptional footwear where Italian craftsmanship meets timeless elegance. Handcrafted luxury shoes.",
   generator: "v0.app",
   icons: {
     icon: [

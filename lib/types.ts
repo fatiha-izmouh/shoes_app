@@ -30,11 +30,13 @@ export interface Review {
 }
 
 export interface CustomMeasurements {
-  footLength: number
-  footWidth: number
-  archHeight: number
-  heelToBall: number
-  instepCircumference: number
+  footLength: number              // A - Foot Length (cm)
+  footWidth: number               // B - Foot Width (cm)
+  ballCircumference: number       // C - Ball Circumference (cm)
+  instepCircumference: number     // D - Instep Circumference (cm)
+  ankleCircumference: number      // E - Ankle Circumference (cm)
+  lowerCalfCircumference: number  // F - Lower Calf Circumference (cm)
+  upperCalfCircumference: number  // G - Upper Calf Circumference (cm)
   calculatedSize: number
 }
 

@@ -13,11 +13,13 @@ interface OrderRequest {
     taille?: number | string
     couleur?: string
     customMeasurements?: {
-      footLength: number
-      footWidth: number
-      archHeight: number
-      heelToBall: number
-      instepCircumference: number
+      footLength: number              // A
+      footWidth: number               // B
+      ballCircumference: number       // C
+      instepCircumference: number     // D
+      ankleCircumference: number      // E
+      lowerCalfCircumference: number  // F
+      upperCalfCircumference: number  // G
       calculatedSize: number
     }
   }>
@@ -72,15 +74,18 @@ export async function POST(request: Request) {
         if (item.customMeasurements) {
           const [measureResult] = await connection.query(
             `INSERT INTO custom_measurements 
-             (id_produit, foot_length, foot_width, arch_height, heel_to_ball, instep_circumference, calculated_size, is_custom)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+             (id_produit, foot_length, foot_width, ball_circumference, instep_circumference, 
+              ankle_circumference, lower_calf_circumference, upper_calf_circumference, calculated_size, is_custom)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
               item.id_produit,
               item.customMeasurements.footLength,
               item.customMeasurements.footWidth,
-              item.customMeasurements.archHeight || 0,
-              item.customMeasurements.heelToBall || 0,
-              item.customMeasurements.instepCircumference,
+              item.customMeasurements.ballCircumference || 0,
+              item.customMeasurements.instepCircumference || 0,
+              item.customMeasurements.ankleCircumference || 0,
+              item.customMeasurements.lowerCalfCircumference || 0,
+              item.customMeasurements.upperCalfCircumference || 0,
               item.customMeasurements.calculatedSize,
               true
             ]

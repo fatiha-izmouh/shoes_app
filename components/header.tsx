@@ -22,7 +22,7 @@ export function Header() {
         <Link href="/" className="flex items-center gap-3">
           <img
             src="/images/logo.jpeg"
-            alt="ValkyLeather"
+            alt=""
             className="h-14 w-14 object-contain"
           />
           <span className="text-xl font-serif tracking-tight hidden sm:inline">ValkyLeather</span>

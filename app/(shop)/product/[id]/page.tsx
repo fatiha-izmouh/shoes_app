@@ -301,8 +301,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
             <p className="text-3xl font-serif mb-6">${product.price}</p>
 
-            {/* Description - Desktop Only */}
-            <p className="text-muted-foreground leading-relaxed mb-8 hidden md:block">{product.description}</p>
 
             {/* Color Selection */}
             <div className="mb-8">
@@ -351,9 +349,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                       setCustomMeasurements({
                         footLength: parseFloat(measurements.length) || 0,
                         footWidth: parseFloat(measurements.width) || 0,
-                        archHeight: 0,
-                        heelToBall: 0,
+                        ballCircumference: parseFloat(measurements.ballCircumference) || 0,
                         instepCircumference: parseFloat(measurements.instepCircumference) || 0,
+                        ankleCircumference: parseFloat(measurements.ankleCircumference) || 0,
+                        lowerCalfCircumference: parseFloat(measurements.lowerCalfCircumference) || 0,
+                        upperCalfCircumference: parseFloat(measurements.upperCalfCircumference) || 0,
                         calculatedSize: parseFloat(measurements.length) * 1.5 + 1.5
                       })
                     }}
@@ -467,8 +467,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               </Button>
             </div>
 
-            {/* Description - Mobile Only (Below interactions) */}
-            <div className="block md:hidden mb-8">
+            {/* Description - Below action buttons */}
+            <div className="mb-8">
               <h3 className="text-lg font-medium mb-2">Description</h3>
               <p className="text-muted-foreground leading-relaxed">{product.description}</p>
             </div>

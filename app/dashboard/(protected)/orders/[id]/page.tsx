@@ -11,8 +11,9 @@ async function getOrder(id: string) {
 async function getOrderItems(id: string) {
     const query = `
     SELECT lc.*, p.nom as product_name, p.image as product_image,
-           cm.foot_length, cm.foot_width, cm.arch_height, cm.heel_to_ball, 
-           cm.instep_circumference, cm.calculated_size, cm.is_custom
+           cm.foot_length, cm.foot_width, cm.ball_circumference, cm.instep_circumference,
+           cm.ankle_circumference, cm.lower_calf_circumference, cm.upper_calf_circumference,
+           cm.calculated_size, cm.is_custom
     FROM ligne_commande lc
     JOIN produit p ON lc.id_produit = p.id_produit
     LEFT JOIN custom_measurements cm ON lc.id_measurement = cm.id_measurement
@@ -82,14 +83,16 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
 
                                             {item.is_custom && (
                                                 <div className="mt-3 text-xs bg-gray-950 border border-gray-800 rounded p-3">
-                                                    <p className="font-semibold text-amber-500 mb-1">Custom Measurements</p>
-                                                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-gray-400">
-                                                        <span>Foot Length: {item.foot_length}mm</span>
-                                                        <span>Foot Width: {item.foot_width}mm</span>
-                                                        <span>Arch Height: {item.arch_height}mm</span>
-                                                        <span>Heel to Ball: {item.heel_to_ball}mm</span>
-                                                        <span>Instep: {item.instep_circumference}mm</span>
-                                                        <span>Calc. Size: {item.calculated_size}</span>
+                                                    <p className="font-semibold text-amber-500 mb-2">Custom Measurements</p>
+                                                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-gray-400">
+                                                        <span>A - Foot Length: {item.foot_length ? `${item.foot_length} cm` : 'N/A'}</span>
+                                                        <span>B - Foot Width: {item.foot_width ? `${item.foot_width} cm` : 'N/A'}</span>
+                                                        <span>C - Ball Circumference: {item.ball_circumference ? `${item.ball_circumference} cm` : 'N/A'}</span>
+                                                        <span>D - Instep Circumference: {item.instep_circumference ? `${item.instep_circumference} cm` : 'N/A'}</span>
+                                                        <span>E - Ankle Circumference: {item.ankle_circumference ? `${item.ankle_circumference} cm` : 'N/A'}</span>
+                                                        <span>F - Lower Calf Circumference: {item.lower_calf_circumference ? `${item.lower_calf_circumference} cm` : 'N/A'}</span>
+                                                        <span className="col-span-2">G - Upper Calf Circumference: {item.upper_calf_circumference ? `${item.upper_calf_circumference} cm` : 'N/A'}</span>
+                                                        <span className="col-span-2 mt-1 pt-1 border-t border-gray-800">Calculated Size: {item.calculated_size ? `${item.calculated_size} (US)` : 'N/A'}</span>
                                                     </div>
                                                 </div>
                                             )}

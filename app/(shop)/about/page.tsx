@@ -7,7 +7,7 @@ export default function AboutPage() {
     <div className="min-h-screen py-12">
       <div className="container mx-auto px-4 max-w-4xl">
         <h1 className="text-4xl md:text-5xl font-serif font-light mb-6 text-balance">Our Story</h1>
-        <p className="text-xl text-muted-foreground mb-12 text-balance">Crafting exceptional footwear since 1985</p>
+        <p className="text-xl text-muted-foreground mb-12 text-balance">Crafting exceptional footwear </p>
 
         <div className="relative aspect-[16/9] mb-12 overflow-hidden rounded-lg">
           <Image src="/images/home_pic.jpg" alt="Our Workshop" fill className="object-cover" />
