@@ -26,26 +26,21 @@ export default function CheckoutPage() {
   const [isPaypalReady, setIsPaypalReady] = useState(false)
   const paypalRef = useRef<HTMLDivElement | null>(null)
 
-  // Redirect to cart page if cart is empty (must be done in an effect, not during render)
+  // Redirect to cart page if cart is empty
   useEffect(() => {
     if (cart.length === 0) {
       router.push("/cart")
     }
   }, [cart.length, router])
 
-  if (cart.length === 0) {
-    // While redirecting, render nothing (or you could show a small loading indicator)
-    return null
-  }
-
   // Stabilize dependencies to prevent PayPal buttons from re-rendering
   const cartTotal = getCartTotal()
   const shippingTotal = getShippingTotal()
-  const cartItems = JSON.stringify(cart) // Stable string representation for deep comparison if needed, or just use cart length
+  const _cartItems = JSON.stringify(cart) // Stable string representation
 
   // Initialize PayPal buttons when SDK is loaded
   useEffect(() => {
-    if (!isPaypalReady || !window.paypal || !paypalRef.current) return
+    if (!isPaypalReady || !window.paypal || !paypalRef.current || cart.length === 0) return
 
     // Create a local reference to clear on cleanup
     let paypalButtons: any = null
@@ -190,7 +185,11 @@ export default function CheckoutPage() {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPaypalReady, cartTotal, shippingTotal, toast, router]) // Removed 'cart' to prevent re-renders on every cart change, using totals instead
+  }, [isPaypalReady, cartTotal, shippingTotal, toast, router, cart.length])
+
+  if (cart.length === 0) {
+    return null
+  }
 
   return (
     <div className="min-h-screen py-12">
