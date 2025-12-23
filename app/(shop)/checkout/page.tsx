@@ -20,29 +20,33 @@ declare global {
 export default function CheckoutPage() {
   const { cart, getCartTotal, getShippingTotal, clearCart } = useCart()
   const router = useRouter()
-
   const { toast } = useToast()
+
   const [isProcessing, setIsProcessing] = useState(false)
   const [isPaypalReady, setIsPaypalReady] = useState(false)
   const paypalRef = useRef<HTMLDivElement | null>(null)
 
-  // Redirect to cart page if cart is empty
+  // Use a ref for the cart to avoid re-rendering PayPal buttons but still have latest data
+  const cartRef = useRef(cart)
+  useEffect(() => {
+    cartRef.current = cart
+  }, [cart])
+
+  // Stabilize dependencies
+  const cartTotal = getCartTotal()
+  const shippingTotal = getShippingTotal()
+
+  // 1. Hook for redirection
   useEffect(() => {
     if (cart.length === 0) {
       router.push("/cart")
     }
   }, [cart.length, router])
 
-  // Stabilize dependencies to prevent PayPal buttons from re-rendering
-  const cartTotal = getCartTotal()
-  const shippingTotal = getShippingTotal()
-  const _cartItems = JSON.stringify(cart) // Stable string representation
-
-  // Initialize PayPal buttons when SDK is loaded
+  // 2. Hook for PayPal initialization
   useEffect(() => {
     if (!isPaypalReady || !window.paypal || !paypalRef.current || cart.length === 0) return
 
-    // Create a local reference to clear on cleanup
     let paypalButtons: any = null
 
     try {
@@ -55,41 +59,41 @@ export default function CheckoutPage() {
         },
         onClick: (_data: any, actions: any) => {
           const form = document.getElementById("checkout-form") as HTMLFormElement | null
-
-          if (!form) {
-            return actions.reject()
-          }
-
+          if (!form) return actions.reject()
           if (!form.checkValidity()) {
             form.reportValidity()
             return actions.reject()
           }
-
           return actions.resolve()
         },
         createOrder: (_data: any, actions: any) => {
           const totalAmount = (cartTotal + shippingTotal).toFixed(2)
+          console.log("[PayPal] Creating order for amount:", totalAmount)
           return actions.order.create({
-            purchase_units: [
-              {
-                amount: {
-                  value: totalAmount,
-                  currency_code: "EUR",
-                },
+            purchase_units: [{
+              amount: {
+                value: totalAmount,
+                currency_code: "EUR",
               },
-            ],
+            }],
           })
         },
         onApprove: async (_data: any, actions: any) => {
           try {
             setIsProcessing(true)
+            console.log("[PayPal] onApprove triggered, capturing...")
 
-            // 1. Validate form data again before capture
-            const form = document.getElementById("checkout-form") as HTMLFormElement | null
-            if (!form || !form.checkValidity()) {
-              form?.reportValidity()
-              throw new Error("Form validation failed")
+            // 1. Capture the payment
+            const captureDetails = await actions.order.capture()
+            console.log("[PayPal] Capture details:", captureDetails)
+
+            if (captureDetails.status !== 'COMPLETED') {
+              throw new Error(`Payment processing status: ${captureDetails.status}`)
             }
+
+            // 2. Read form data
+            const form = document.getElementById("checkout-form") as HTMLFormElement | null
+            if (!form) throw new Error("Checkout form not found")
 
             const formData = new FormData(form)
             const firstName = (formData.get("firstName") as string) || ""
@@ -100,19 +104,12 @@ export default function CheckoutPage() {
             const zip = (formData.get("zip") as string) || ""
             const fullAddress = `${address}, ${city}, ${zip}`
 
-            // 2. Capture the payment with PayPal
-            const captureDetails = await actions.order.capture()
-
-            if (captureDetails.status !== 'COMPLETED') {
-              throw new Error(`Payment status: ${captureDetails.status}`)
-            }
-
-            // 3. Prepare order data
+            // 3. Prepare order data using the cart ref (to avoid stale data)
             const orderData = {
               nom_client: `${firstName} ${lastName}`,
               email,
               adresse: fullAddress,
-              items: cart.map((item) => ({
+              items: cartRef.current.map((item) => ({
                 id_produit: parseInt(item.product.id),
                 quantite: item.quantity,
                 prix_unitaire: item.product.price,
@@ -128,55 +125,55 @@ export default function CheckoutPage() {
               },
             }
 
-            // 4. Save to database
+            console.log("[Backend] Creating order in database...", orderData)
             const response = await fetch("/api/orders", {
               method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
+              headers: { "Content-Type": "application/json" },
               body: JSON.stringify(orderData),
             })
 
             if (!response.ok) {
-              // Note: At this point payment is captured but order creation failed in our DB
-              // This should be handled with a support message or retry logic
-              throw new Error("Payment successful but failed to save order details. Please contact support.")
+              const errorData = await response.json()
+              console.error("[Backend] Order creation failed:", errorData)
+              throw new Error("Payment successful, but we failed to record your order. Please contact support.")
             }
 
-            // 5. Success flow
+            console.log("[Checkout] Order created successfully")
             toast({
               title: "Order placed successfully!",
-              description: "Thank you for your purchase. You will receive a confirmation email shortly.",
+              description: "Thank you for your purchase.",
             })
 
             clearCart()
             router.push("/")
           } catch (error: any) {
-            console.error("Error during PayPal payment:", error)
+            console.error("[Checkout Error]", error)
             toast({
-              title: "Payment error",
-              description: error.message || "There was a problem processing your payment. Please try again.",
+              title: "Error",
+              description: error.message || "An unexpected error occurred.",
               variant: "destructive",
             })
           } finally {
             setIsProcessing(false)
           }
         },
+        onCancel: () => {
+          console.log("[PayPal] Transaction cancelled by user")
+          setIsProcessing(false)
+        },
         onError: (err: any) => {
-          console.error("PayPal error:", err)
+          console.error("[PayPal SDK Error]", err)
           toast({
             title: "Payment error",
-            description: "There was a problem with the payment window. Please try again.",
+            description: "There was a problem with the payment window.",
             variant: "destructive",
           })
-        },
+        }
       })
 
-      if (paypalButtons) {
-        paypalButtons.render(paypalRef.current)
-      }
+      paypalButtons.render(paypalRef.current)
     } catch (error) {
-      console.error("Failed to initialize PayPal buttons:", error)
+      console.error("[PayPal Initialization Error]", error)
     }
 
     return () => {
@@ -185,10 +182,19 @@ export default function CheckoutPage() {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPaypalReady, cartTotal, shippingTotal, toast, router, cart.length])
+  }, [isPaypalReady, cartTotal, shippingTotal, toast, router])
 
+  // !! ALL HOOKS MUST BE DECLARED ABOVE THIS LINE !!
   if (cart.length === 0) {
-    return null
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center p-4">
+        <h1 className="text-4xl font-serif mb-4">Your Cart is Empty</h1>
+        <p className="text-muted-foreground mb-8">Add some exceptional footwear to get started</p>
+        <Button onClick={() => router.push("/shop")} className="bg-amber-950 hover:bg-amber-900 text-white px-8 py-6 rounded-md">
+          Continue Shopping
+        </Button>
+      </div>
+    )
   }
 
   return (
