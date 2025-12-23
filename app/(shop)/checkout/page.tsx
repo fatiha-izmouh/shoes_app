@@ -38,12 +38,26 @@ export default function CheckoutPage() {
     return null
   }
 
+  // Stabilize dependencies to prevent PayPal buttons from re-rendering
+  const cartTotal = getCartTotal()
+  const shippingTotal = getShippingTotal()
+  const cartItems = JSON.stringify(cart) // Stable string representation for deep comparison if needed, or just use cart length
+
   // Initialize PayPal buttons when SDK is loaded
   useEffect(() => {
     if (!isPaypalReady || !window.paypal || !paypalRef.current) return
 
-    const paypalButtons = window.paypal
-      .Buttons({
+    // Create a local reference to clear on cleanup
+    let paypalButtons: any = null
+
+    try {
+      paypalButtons = window.paypal.Buttons({
+        style: {
+          layout: 'vertical',
+          color: 'gold',
+          shape: 'rect',
+          label: 'pay',
+        },
         onClick: (_data: any, actions: any) => {
           const form = document.getElementById("checkout-form") as HTMLFormElement | null
 
@@ -51,7 +65,6 @@ export default function CheckoutPage() {
             return actions.reject()
           }
 
-          // Use native browser validation for each required input
           if (!form.checkValidity()) {
             form.reportValidity()
             return actions.reject()
@@ -60,14 +73,13 @@ export default function CheckoutPage() {
           return actions.resolve()
         },
         createOrder: (_data: any, actions: any) => {
-          const totalWithTax = (getCartTotal() + getShippingTotal()).toFixed(2)
+          const totalAmount = (cartTotal + shippingTotal).toFixed(2)
           return actions.order.create({
-
             purchase_units: [
               {
                 amount: {
-                  value: totalWithTax,
-                  currency_code: "EUR", // Change to your preferred currency
+                  value: totalAmount,
+                  currency_code: "EUR",
                 },
               },
             ],
@@ -76,30 +88,31 @@ export default function CheckoutPage() {
         onApprove: async (_data: any, actions: any) => {
           try {
             setIsProcessing(true)
-            // Capture the payment with PayPal
-            await actions.order.capture()
 
-            // Read shipping information from the form
+            // 1. Validate form data again before capture
             const form = document.getElementById("checkout-form") as HTMLFormElement | null
-            const formData = form ? new FormData(form) : null
-
-            const firstName = (formData?.get("firstName") as string) || ""
-            const lastName = (formData?.get("lastName") as string) || ""
-            const email = (formData?.get("email") as string) || ""
-            const address = (formData?.get("address") as string) || ""
-            const city = (formData?.get("city") as string) || ""
-            const zip = (formData?.get("zip") as string) || ""
-            const fullAddress = `${address}, ${city}, ${zip}`
-
-            if (!firstName || !lastName || !email || !address || !city || !zip) {
-              throw new Error("Please fill in all shipping fields before paying.")
+            if (!form || !form.checkValidity()) {
+              form?.reportValidity()
+              throw new Error("Form validation failed")
             }
 
-            // Calculate total with tax (same calculation as in createOrder)
-            const totalWithTax: number = getCartTotal() + getShippingTotal()
+            const formData = new FormData(form)
+            const firstName = (formData.get("firstName") as string) || ""
+            const lastName = (formData.get("lastName") as string) || ""
+            const email = (formData.get("email") as string) || ""
+            const address = (formData.get("address") as string) || ""
+            const city = (formData.get("city") as string) || ""
+            const zip = (formData.get("zip") as string) || ""
+            const fullAddress = `${address}, ${city}, ${zip}`
 
+            // 2. Capture the payment with PayPal
+            const captureDetails = await actions.order.capture()
 
-            // Prepare order data to save in your database
+            if (captureDetails.status !== 'COMPLETED') {
+              throw new Error(`Payment status: ${captureDetails.status}`)
+            }
+
+            // 3. Prepare order data
             const orderData = {
               nom_client: `${firstName} ${lastName}`,
               email,
@@ -114,12 +127,13 @@ export default function CheckoutPage() {
                 isCustomSize: item.isCustomSize
               })),
               payment: {
-                montant: parseFloat(totalWithTax.toFixed(2)),
+                montant: parseFloat((cartTotal + shippingTotal).toFixed(2)),
                 methode: "paypal",
                 statut: "completed",
               },
             }
 
+            // 4. Save to database
             const response = await fetch("/api/orders", {
               method: "POST",
               headers: {
@@ -129,46 +143,54 @@ export default function CheckoutPage() {
             })
 
             if (!response.ok) {
-              throw new Error("Failed to create order")
+              // Note: At this point payment is captured but order creation failed in our DB
+              // This should be handled with a support message or retry logic
+              throw new Error("Payment successful but failed to save order details. Please contact support.")
             }
 
-            clearCart()
-            setIsProcessing(false)
-
+            // 5. Success flow
             toast({
               title: "Order placed successfully!",
               description: "Thank you for your purchase. You will receive a confirmation email shortly.",
             })
 
+            clearCart()
             router.push("/")
-          } catch (error) {
+          } catch (error: any) {
             console.error("Error during PayPal payment:", error)
-            setIsProcessing(false)
             toast({
               title: "Payment error",
-              description: "There was a problem processing your PayPal payment. Please try again.",
+              description: error.message || "There was a problem processing your payment. Please try again.",
               variant: "destructive",
             })
+          } finally {
+            setIsProcessing(false)
           }
         },
         onError: (err: any) => {
           console.error("PayPal error:", err)
           toast({
             title: "Payment error",
-            description: "There was a problem initializing PayPal. Please try again.",
+            description: "There was a problem with the payment window. Please try again.",
             variant: "destructive",
           })
         },
       })
 
-    paypalButtons.render(paypalRef.current)
+      if (paypalButtons) {
+        paypalButtons.render(paypalRef.current)
+      }
+    } catch (error) {
+      console.error("Failed to initialize PayPal buttons:", error)
+    }
 
     return () => {
       if (paypalButtons && paypalButtons.close) {
         paypalButtons.close()
       }
     }
-  }, [isPaypalReady, cart, getCartTotal, clearCart, toast, router])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPaypalReady, cartTotal, shippingTotal, toast, router]) // Removed 'cart' to prevent re-renders on every cart change, using totals instead
 
   return (
     <div className="min-h-screen py-12">
