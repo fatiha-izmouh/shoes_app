@@ -41,13 +41,15 @@ export async function createProduct(prevState: any, formData: FormData) {
     }
 
     try {
-        const image = await uploadImage(imageFile)
-        const image2 = await uploadImage(image2File)
-        const image3 = await uploadImage(image3File)
-        const image4 = await uploadImage(image4File)
-        const image5 = await uploadImage(image5File)
-        const image6 = await uploadImage(image6File)
-        const image7 = await uploadImage(image7File)
+        const [image, image2, image3, image4, image5, image6, image7] = await Promise.all([
+            uploadImage(imageFile),
+            uploadImage(image2File),
+            uploadImage(image3File),
+            uploadImage(image4File),
+            uploadImage(image5File),
+            uploadImage(image6File),
+            uploadImage(image7File)
+        ])
 
         // Double-check that main image was uploaded successfully
         if (!image) {
@@ -95,13 +97,15 @@ export async function updateProduct(id: number, prevState: any, formData: FormDa
         const image6File = formData.get('image6') as File
         const image7File = formData.get('image7') as File
 
-        const image = (imageFile && imageFile.size > 0) ? await uploadImage(imageFile) : current.image
-        const image2 = (image2File && image2File.size > 0) ? await uploadImage(image2File) : current.image2
-        const image3 = (image3File && image3File.size > 0) ? await uploadImage(image3File) : current.image3
-        const image4 = (image4File && image4File.size > 0) ? await uploadImage(image4File) : current.image4
-        const image5 = (image5File && image5File.size > 0) ? await uploadImage(image5File) : current.image5
-        const image6 = (image6File && image6File.size > 0) ? await uploadImage(image6File) : current.image6
-        const image7 = (image7File && image7File.size > 0) ? await uploadImage(image7File) : current.image7
+        const [image, image2, image3, image4, image5, image6, image7] = await Promise.all([
+            (imageFile && imageFile.size > 0) ? uploadImage(imageFile) : current.image,
+            (image2File && image2File.size > 0) ? uploadImage(image2File) : current.image2,
+            (image3File && image3File.size > 0) ? uploadImage(image3File) : current.image3,
+            (image4File && image4File.size > 0) ? uploadImage(image4File) : current.image4,
+            (image5File && image5File.size > 0) ? uploadImage(image5File) : current.image5,
+            (image6File && image6File.size > 0) ? uploadImage(image6File) : current.image6,
+            (image7File && image7File.size > 0) ? uploadImage(image7File) : current.image7
+        ])
 
         await pool.query(
             'UPDATE produit SET nom = ?, description = ?, prix = ?, frais_livraison = ?, image = ?, image2 = ?, image3 = ?, image4 = ?, image5 = ?, image6 = ?, image7 = ? WHERE id_produit = ?',
