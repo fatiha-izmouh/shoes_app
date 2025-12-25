@@ -37,7 +37,7 @@ export default function TermsPage() {
                             <li>All prices are listed in USD and are subject to change without notice</li>
                             <li>We reserve the right to refuse or cancel any order</li>
                             <li>Payment must be received before production begins</li>
-                            <li>Production time is typically 3-4 weeks from order confirmation</li>
+                            <li>Production time is typically 2-4 weeks from order confirmation</li>
                             <li>Shipping times are estimates and not guaranteed</li>
                         </ul>
                     </section>

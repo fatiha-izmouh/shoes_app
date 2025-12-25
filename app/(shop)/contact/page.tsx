@@ -46,8 +46,8 @@ export default function ContactPage() {
         description: "Thank you for contacting us. We'll get back to you within 24 hours.",
       })
 
-      // Reset form
-      ;(e.target as HTMLFormElement).reset()
+        // Reset form
+        ; (e.target as HTMLFormElement).reset()
       setIsSubmitting(false)
     } catch (error) {
       console.error("Error sending message:", error)
@@ -78,7 +78,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-medium mb-1">Email</h3>
-                    <p className="text-sm text-muted-foreground">contact@valkyleather.store</p>
+                    <p className="text-sm text-muted-foreground">Valkyleather@gmail.com</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -87,8 +87,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="font-medium mb-1">Phone</h3>
-                    <p className="text-sm text-muted-foreground">+1 (555) 123-4567</p>
-                    <p className="text-sm text-muted-foreground">+39 055 123-4567 (Italy)</p>
+                    <p className="text-sm text-muted-foreground">+212 764770260</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -98,9 +97,7 @@ export default function ContactPage() {
                   <div>
                     <h3 className="font-medium mb-1">Flagship Store</h3>
                     <p className="text-sm text-muted-foreground">
-                      123 Luxury Lane
-                      <br />
-                      Florence, Italy 50100
+                      Taroudant, Morocco
                     </p>
                   </div>
                 </div>
@@ -138,7 +135,7 @@ export default function ContactPage() {
                 <div className="space-y-3 text-sm">
                   <div>
                     <p className="font-medium mb-1">How long does shipping take?</p>
-                    <p className="text-muted-foreground">Standard delivery: 5-7 business days. Express: 2-3 days.</p>
+                    <p className="text-muted-foreground">Standard delivery: 2-4 weeks.</p>
                   </div>
                   <div>
                     <p className="font-medium mb-1">What is your return policy?</p>
