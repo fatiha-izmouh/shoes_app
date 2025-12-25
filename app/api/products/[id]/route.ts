@@ -71,11 +71,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       productImagesBeforePadding: productImages,
     })
 
-    // Ensure we always have exactly 7 images (pad with placeholder if needed)
-    while (productImages.length < 7) {
-      productImages.push("/placeholder.svg")
-    }
-
     // Take only first 7 images
     productImages = productImages.slice(0, 7)
 

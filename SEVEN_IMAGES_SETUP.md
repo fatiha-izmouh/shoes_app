@@ -54,10 +54,11 @@ The dashboard has been updated to support uploading and editing all 7 images.
 
 ## Frontend Display
 
-The product detail page automatically handles the increased number of images using its existing carousel and dot indicator logic.
+The product detail page automatically handles the number of images provided (from 1 to 7) using its existing carousel and dot indicator logic. **No placeholders are shown for missing slots;** the app only displays the images you actually upload.
 
 ## Usage
 
 When adding or editing a product, you will now see 7 image upload slots. The first one is required, while the others are optional.
-- If you provide fewer than 7 images, the app will show placeholders for the remaining slots in the API (to maintain consistent array length) but the carousel typically filters them or handles them gracefully. 
-- *Note:* The frontend carousel is dynamic and will show as many images as provided.
+- If you provide 3 images, the product page will show exactly 3 images.
+- If you provide 7 images, it will show all 7.
+- The carousel and navigation dots will adjust automatically to the number of images.

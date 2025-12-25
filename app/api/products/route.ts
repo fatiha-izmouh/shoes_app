@@ -45,9 +45,6 @@ export async function GET() {
         productImages = additionalData.images
       }
 
-      while (productImages.length < 7) {
-        productImages.push("/placeholder.svg")
-      }
       productImages = productImages.slice(0, 7)
 
       // Get stock for this product
