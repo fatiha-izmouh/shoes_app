@@ -326,7 +326,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             {/* Size Selection */}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-3">
-                <label className="text-sm font-medium block">Size (US)</label>
+                <label className="text-sm font-medium block">Size (EU)</label>
                 <div className="flex items-center gap-2">
                   <Button
                     variant={!isCustomizeMode ? "default" : "outline"}

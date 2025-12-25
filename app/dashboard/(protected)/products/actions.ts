@@ -30,6 +30,10 @@ export async function createProduct(prevState: any, formData: FormData) {
     const imageFile = formData.get('image') as File
     const image2File = formData.get('image2') as File
     const image3File = formData.get('image3') as File
+    const image4File = formData.get('image4') as File
+    const image5File = formData.get('image5') as File
+    const image6File = formData.get('image6') as File
+    const image7File = formData.get('image7') as File
 
     // Validate that main image is provided
     if (!imageFile || imageFile.size === 0) {
@@ -40,6 +44,10 @@ export async function createProduct(prevState: any, formData: FormData) {
         const image = await uploadImage(imageFile)
         const image2 = await uploadImage(image2File)
         const image3 = await uploadImage(image3File)
+        const image4 = await uploadImage(image4File)
+        const image5 = await uploadImage(image5File)
+        const image6 = await uploadImage(image6File)
+        const image7 = await uploadImage(image7File)
 
         // Double-check that main image was uploaded successfully
         if (!image) {
@@ -47,8 +55,8 @@ export async function createProduct(prevState: any, formData: FormData) {
         }
 
         await pool.query(
-            'INSERT INTO produit (nom, description, prix, frais_livraison, image, image2, image3) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [name, description, price, shipping, image, image2, image3]
+            'INSERT INTO produit (nom, description, prix, frais_livraison, image, image2, image3, image4, image5, image6, image7) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [name, description, price, shipping, image, image2, image3, image4, image5, image6, image7]
         )
 
         revalidatePath('/dashboard/products')
@@ -72,7 +80,7 @@ export async function updateProduct(id: number, prevState: any, formData: FormDa
         // Get existing product to keep images if not updated
         // Ideally we pass existing images as hidden fields or fetch them here.
         // Fetching is safer.
-        const [existing] = await pool.query('SELECT image, image2, image3, frais_livraison FROM produit WHERE id_produit = ?', [id]) as any
+        const [existing] = await pool.query('SELECT image, image2, image3, image4, image5, image6, image7, frais_livraison FROM produit WHERE id_produit = ?', [id]) as any
         if (!existing || existing.length === 0) {
 
             return { error: 'Product not found' }
@@ -82,14 +90,22 @@ export async function updateProduct(id: number, prevState: any, formData: FormDa
         const imageFile = formData.get('image') as File
         const image2File = formData.get('image2') as File
         const image3File = formData.get('image3') as File
+        const image4File = formData.get('image4') as File
+        const image5File = formData.get('image5') as File
+        const image6File = formData.get('image6') as File
+        const image7File = formData.get('image7') as File
 
         const image = (imageFile && imageFile.size > 0) ? await uploadImage(imageFile) : current.image
         const image2 = (image2File && image2File.size > 0) ? await uploadImage(image2File) : current.image2
         const image3 = (image3File && image3File.size > 0) ? await uploadImage(image3File) : current.image3
+        const image4 = (image4File && image4File.size > 0) ? await uploadImage(image4File) : current.image4
+        const image5 = (image5File && image5File.size > 0) ? await uploadImage(image5File) : current.image5
+        const image6 = (image6File && image6File.size > 0) ? await uploadImage(image6File) : current.image6
+        const image7 = (image7File && image7File.size > 0) ? await uploadImage(image7File) : current.image7
 
         await pool.query(
-            'UPDATE produit SET nom = ?, description = ?, prix = ?, frais_livraison = ?, image = ?, image2 = ?, image3 = ? WHERE id_produit = ?',
-            [name, description, price, shipping, image, image2, image3, id]
+            'UPDATE produit SET nom = ?, description = ?, prix = ?, frais_livraison = ?, image = ?, image2 = ?, image3 = ?, image4 = ?, image5 = ?, image6 = ?, image7 = ? WHERE id_produit = ?',
+            [name, description, price, shipping, image, image2, image3, image4, image5, image6, image7, id]
         )
 
         revalidatePath('/dashboard/products')

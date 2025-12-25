@@ -45,17 +45,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     // Next.js serves files from public/ folder automatically
     let productImages: string[] = []
 
-    // Collect all images from database columns (image, image2, image3)
+    // Collect all images from database columns (image, image2, image3, image4, image5, image6, image7)
     // Filter out null, undefined, or empty strings
-    if (row.image && row.image.trim() !== "") {
-      productImages.push(row.image.trim())
-    }
-    if (row.image2 && row.image2.trim() !== "") {
-      productImages.push(row.image2.trim())
-    }
-    if (row.image3 && row.image3.trim() !== "") {
-      productImages.push(row.image3.trim())
-    }
+    const imageColumns = ['image', 'image2', 'image3', 'image4', 'image5', 'image6', 'image7']
+    imageColumns.forEach(col => {
+      if (row[col] && row[col].trim() !== "") {
+        productImages.push(row[col].trim())
+      }
+    })
 
     // Fallback to JSON description images if database columns are empty
     if (productImages.length === 0 && additionalData.images && additionalData.images.length > 0) {
@@ -67,17 +64,20 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       image: row.image,
       image2: row.image2,
       image3: row.image3,
+      image4: row.image4,
+      image5: row.image5,
+      image6: row.image6,
+      image7: row.image7,
       productImagesBeforePadding: productImages,
     })
 
-    // Ensure we always have exactly 3 images (pad with placeholder if needed)
-    // Only pad if columns are actually empty - don't replace existing values
-    while (productImages.length < 3) {
+    // Ensure we always have exactly 7 images (pad with placeholder if needed)
+    while (productImages.length < 7) {
       productImages.push("/placeholder.svg")
     }
 
-    // Take only first 3 images (image, image2, image3)
-    productImages = productImages.slice(0, 3)
+    // Take only first 7 images
+    productImages = productImages.slice(0, 7)
 
     console.log(`Product ${productId} final images array:`, productImages)
 

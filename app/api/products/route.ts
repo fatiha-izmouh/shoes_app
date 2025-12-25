@@ -36,18 +36,19 @@ export async function GET() {
       } catch { }
 
       let productImages: string[] = []
-      if (row.image) productImages.push(row.image)
-      if (row.image2) productImages.push(row.image2)
-      if (row.image3) productImages.push(row.image3)
+      const imageColumns = ['image', 'image2', 'image3', 'image4', 'image5', 'image6', 'image7']
+      imageColumns.forEach(col => {
+        if (row[col]) productImages.push(row[col])
+      })
 
       if (productImages.length === 0 && additionalData.images && additionalData.images.length > 0) {
         productImages = additionalData.images
       }
 
-      while (productImages.length < 3) {
+      while (productImages.length < 7) {
         productImages.push("/placeholder.svg")
       }
-      productImages = productImages.slice(0, 3)
+      productImages = productImages.slice(0, 7)
 
       // Get stock for this product
       const productStock = stockMap[row.id_produit] || []

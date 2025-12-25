@@ -7,6 +7,10 @@ export interface ProduitDB {
   image: string | null
   image2: string | null
   image3: string | null
+  image4: string | null
+  image5: string | null
+  image6: string | null
+  image7: string | null
   frais_livraison: number // Shipping cost
 
 }

@@ -20,7 +20,7 @@ export default function FAQPage() {
                     <section>
                         <h2 className="text-2xl font-serif font-light mb-3">How long does it take to make a pair?</h2>
                         <p className="text-muted-foreground leading-relaxed">
-                            Since each pair is handmade to order, production typically takes 3-4 weeks. This timeframe allows us to carefully craft your shoes with attention to every detail. During busy periods, this may extend slightly, and we'll always keep you informed.
+                            Since each pair is handmade to order, production typically takes 4 days to 1 week. This timeframe allows us to carefully craft your shoes with attention to every detail. During busy periods, this may extend slightly, and we'll always keep you informed.
                         </p>
                     </section>
 

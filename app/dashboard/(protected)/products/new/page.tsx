@@ -10,19 +10,22 @@ import { ArrowLeft } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import Image from 'next/image'
 
+const IMAGE_FIELDS = ['image', 'image2', 'image3', 'image4', 'image5', 'image6', 'image7'] as const
+type ImageField = typeof IMAGE_FIELDS[number]
+
 export default function NewProductPage() {
     const [state, formAction, isPending] = useActionState(createProduct, null)
-    const [imagePreviews, setImagePreviews] = useState<{
-        image: string | null
-        image2: string | null
-        image3: string | null
-    }>({
+    const [imagePreviews, setImagePreviews] = useState<Record<string, string | null>>({
         image: null,
         image2: null,
         image3: null,
+        image4: null,
+        image5: null,
+        image6: null,
+        image7: null,
     })
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'image' | 'image2' | 'image3') => {
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
         const file = e.target.files?.[0]
         if (file) {
             const reader = new FileReader()
@@ -46,7 +49,7 @@ export default function NewProductPage() {
     }
 
     return (
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="max-w-4xl mx-auto space-y-6">
             <div className="flex items-center gap-4">
                 <Link
                     href="/dashboard/products"
@@ -59,26 +62,28 @@ export default function NewProductPage() {
 
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
                 <form action={formAction} encType="multipart/form-data" className="space-y-6">
-                    <div className="space-y-2">
-                        <Label htmlFor="name" className="text-gray-200">Product Name</Label>
-                        <Input
-                            id="name"
-                            name="name"
-                            required
-                            className="bg-gray-800 border-gray-700 text-white"
-                        />
-                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="name" className="text-gray-200">Product Name</Label>
+                            <Input
+                                id="name"
+                                name="name"
+                                required
+                                className="bg-gray-800 border-gray-700 text-white"
+                            />
+                        </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="price" className="text-gray-200">Price</Label>
-                        <Input
-                            id="price"
-                            name="price"
-                            type="number"
-                            step="0.01"
-                            required
-                            className="bg-gray-800 border-gray-700 text-white"
-                        />
+                        <div className="space-y-2">
+                            <Label htmlFor="price" className="text-gray-200">Price</Label>
+                            <Input
+                                id="price"
+                                name="price"
+                                type="number"
+                                step="0.01"
+                                required
+                                className="bg-gray-800 border-gray-700 text-white"
+                            />
+                        </div>
                     </div>
 
                     <div className="space-y-2">
@@ -93,78 +98,40 @@ export default function NewProductPage() {
                     </div>
 
                     <div className="space-y-4">
-                        <Label className="text-gray-200">Product Images</Label>
-                        <p className="text-xs text-gray-400">Main image is required. Upload at least one product image.</p>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {/* Main Image */}
-                            <div className="space-y-2">
-                                <Label htmlFor="image" className="text-xs text-gray-400">Main Image *</Label>
-                                <Input
-                                    id="image"
-                                    name="image"
-                                    type="file"
-                                    accept="image/*"
-                                    required
-                                    onChange={(e) => handleImageChange(e, 'image')}
-                                    className="bg-gray-800 border-gray-700 text-white cursor-pointer file:cursor-pointer file:text-white file:bg-gray-700 file:border-0 file:rounded-md file:px-2 file:mr-2 hover:file:bg-gray-600 transition-colors"
-                                />
-                                {imagePreviews.image && (
-                                    <div className="relative aspect-square w-full overflow-hidden rounded-lg border-2 border-amber-600">
-                                        <Image
-                                            src={imagePreviews.image}
-                                            alt="Main image preview"
-                                            fill
-                                            className="object-cover"
-                                        />
-                                    </div>
-                                )}
-                            </div>
+                        <Label className="text-gray-200">Product Images (Up to 7)</Label>
+                        <p className="text-xs text-gray-400">Main image is required. You can add up to 6 secondary images.</p>
 
-                            {/* Image 2 */}
-                            <div className="space-y-2">
-                                <Label htmlFor="image2" className="text-xs text-gray-400">Image 2 (Optional)</Label>
-                                <Input
-                                    id="image2"
-                                    name="image2"
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => handleImageChange(e, 'image2')}
-                                    className="bg-gray-800 border-gray-700 text-white cursor-pointer file:cursor-pointer file:text-white file:bg-gray-700 file:border-0 file:rounded-md file:px-2 file:mr-2 hover:file:bg-gray-600 transition-colors"
-                                />
-                                {imagePreviews.image2 && (
-                                    <div className="relative aspect-square w-full overflow-hidden rounded-lg border-2 border-gray-600">
-                                        <Image
-                                            src={imagePreviews.image2}
-                                            alt="Image 2 preview"
-                                            fill
-                                            className="object-cover"
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                            {IMAGE_FIELDS.map((field, index) => (
+                                <div key={field} className="space-y-2">
+                                    <Label htmlFor={field} className="text-xs text-gray-400">
+                                        {index === 0 ? 'Main Image *' : `Image ${index + 1}`}
+                                    </Label>
+                                    <div className="relative aspect-square w-full overflow-hidden rounded-lg border-2 border-gray-700 hover:border-amber-600 transition-colors bg-gray-800">
+                                        {imagePreviews[field] ? (
+                                            <Image
+                                                src={imagePreviews[field]!}
+                                                alt={`Preview ${field}`}
+                                                fill
+                                                className="object-cover"
+                                            />
+                                        ) : (
+                                            <div className="flex items-center justify-center h-full text-gray-600 text-[10px] text-center p-2">
+                                                Click to upload
+                                            </div>
+                                        )}
+                                        <input
+                                            id={field}
+                                            name={field}
+                                            type="file"
+                                            accept="image/*"
+                                            required={index === 0}
+                                            onChange={(e) => handleImageChange(e, field)}
+                                            className="absolute inset-0 opacity-0 cursor-pointer"
                                         />
                                     </div>
-                                )}
-                            </div>
-
-                            {/* Image 3 */}
-                            <div className="space-y-2">
-                                <Label htmlFor="image3" className="text-xs text-gray-400">Image 3 (Optional)</Label>
-                                <Input
-                                    id="image3"
-                                    name="image3"
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => handleImageChange(e, 'image3')}
-                                    className="bg-gray-800 border-gray-700 text-white cursor-pointer file:cursor-pointer file:text-white file:bg-gray-700 file:border-0 file:rounded-md file:px-2 file:mr-2 hover:file:bg-gray-600 transition-colors"
-                                />
-                                {imagePreviews.image3 && (
-                                    <div className="relative aspect-square w-full overflow-hidden rounded-lg border-2 border-gray-600">
-                                        <Image
-                                            src={imagePreviews.image3}
-                                            alt="Image 3 preview"
-                                            fill
-                                            className="object-cover"
-                                        />
-                                    </div>
-                                )}
-                            </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
 
@@ -177,7 +144,7 @@ export default function NewProductPage() {
                     <div className="flex justify-end pt-4">
                         <Button
                             type="submit"
-                            className="bg-amber-600 hover:bg-amber-700 text-white"
+                            className="bg-amber-600 hover:bg-amber-700 text-white px-8"
                             disabled={isPending}
                         >
                             {isPending ? 'Creating...' : 'Create Product'}
